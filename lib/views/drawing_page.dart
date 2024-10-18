@@ -14,10 +14,21 @@ class _DrawingPageState extends State<DrawingPage> {
   final GlobalKey<CanvasWidgetState> _canvasKey = GlobalKey<CanvasWidgetState>();
 
   // Method to handle recognition results
-  void _onRecognitionComplete(String result) {
+    void _onRecognitionComplete(String result) {
     if (result.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result)),
+        SnackBar(
+          content: Text(result),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 100,
+            right: 20,
+            left: 20,
+          ),
+        ),
       );
     }
   }
