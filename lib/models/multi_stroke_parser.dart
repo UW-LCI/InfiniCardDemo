@@ -4,12 +4,12 @@ import 'package:path_provider/path_provider.dart';
 import 'dollar_q.dart';
 
 class MultiStrokeParser {
-  static const String xmlDataFolder = 'XMLData';
+  static const String xmlDataFolder = 'template';
 
   static Future<List<MultiStrokePath>> loadStrokePatternsLocal() async {
     final directory = await getApplicationDocumentsDirectory();
-    print('directory.path: ${directory.path}');
     final patternDir = Directory('${directory.path}/$xmlDataFolder');
+    print('pattern.path: ${patternDir.path}');
 
     if (!await patternDir.exists()) {
       return [];
