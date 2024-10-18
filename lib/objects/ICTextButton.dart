@@ -8,7 +8,7 @@ import 'package:infinicard_v1/functions/helpers.dart';
 
 class ICTextButton extends ICObject{
   Map? action;
-  ICText child = ICText("");
+  ICText child = ICText("Button");
 
   double? height;
   double? width;

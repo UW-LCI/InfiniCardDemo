@@ -5,8 +5,8 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 
 class ICImage extends ICObject{
   String path;
-  double? width;
-  double? height;
+  double? width = 50;
+  double? height = 50;
   String semanticLabel = "";
   BoxShape shape = BoxShape.rectangle;
   BorderRadiusGeometry? border;
@@ -90,7 +90,7 @@ class ICImage extends ICObject{
     final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
     final widthElement = (width!= null) ? XmlElement(XmlName("width"), [], [XmlText(width.toString())]) : XmlElement(XmlName("width"), [], [XmlText("")]);
     final labelElement = (semanticLabel != "") ? XmlElement(XmlName("altText"), [], [XmlText(semanticLabel)]) : XmlElement(XmlName("altText"), [], [XmlText("")]);
-    
+
     if(verbose==false){
       if(height != null){sizeElement.children.add(heightElement);}
       if(width != null){sizeElement.children.add(widthElement);}
