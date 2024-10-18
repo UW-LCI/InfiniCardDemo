@@ -5,6 +5,14 @@ import '../models/multi_stroke_parser.dart';
 import '../models/dollar_q.dart';
 import '../models/multi_stroke_write.dart';
 
+String recognize(){
+  CanvasWidgetState canvasWidgetState = CanvasWidgetState();
+  Map<dynamic, dynamic> dictionary = canvasWidgetState.stringToDictionary();
+  String xml = canvasWidgetState.dictionaryToXML(dictionary);
+  // print(xml);
+  return xml;
+}
+
 class CanvasWidget extends StatefulWidget {
   final Function(String) onRecognitionComplete;
 
@@ -69,18 +77,20 @@ class CanvasWidgetState extends State<CanvasWidget> {
   }
 
   // This is for DOLLARQ recognition, we can ignore this for now
-  void _recognizeGesture() async {
+  Future<String> _recognizeGesture() async {
       var flattenedStrokes = _strokes.expand((stroke) => stroke).toList();
       var candidate = MultiStrokePath(flattenedStrokes);
       var result = _dollarQ.recognize(candidate);
 
       if (result.isNotEmpty) {
-        var score = result['score'] as double;
+        // var score = result['score'] as double;
         var templateIndex = result['templateIndex'] as int;
         var templateName = _dollarQ.templates[templateIndex].name;
-        widget.onRecognitionComplete('Recognized: $templateName (Score: ${score.toStringAsFixed(2)})');
+        widget.onRecognitionComplete('Recognized: $templateName');
+        return templateName;
       } else {
         widget.onRecognitionComplete('No match found');
+        return 'Unknown';
       }
     }
 
@@ -113,9 +123,44 @@ class CanvasWidgetState extends State<CanvasWidget> {
     _clear();
   }
 
-  void recognizeGesture() {
-    _recognizeGesture();
+  String recognizeGesture() {
+    // String result = await _recognizeGesture();
+    String result = '';
+    _recognizeGesture().then(
+      (String value) {
+        setState(() {
+          print("Value: $value");
+          result = value.toString();
+        });
+      }
+    );
+    return result;
   }
+
+// {root: {ui: {image: {path: }, text: {data: Text}, textbutton: }}}
+
+  // Future<String> -> XML
+  Map<dynamic, dynamic> stringToDictionary() {
+    Map<String, dynamic> dictionary = {"root": {"ui": {}}};
+    String gesture = recognizeGesture();
+    dictionary["root"]["ui"] = {gesture: {}};
+    return dictionary;
+  }
+
+  String dictionaryToXML(Map<dynamic, dynamic> dictionary) {
+    String xml = "";
+    dictionary.forEach((key, value) {
+      xml += "<$key>";
+      if (value is Map) {
+        xml += dictionaryToXML(value);
+      } else {
+        xml += value.toString();
+      }
+      xml += "</$key>";
+    });
+    return xml;
+  }
+
 
   Future<void> saveGesture(String name) async {
     await _saveGesture(name);
