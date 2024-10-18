@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/objects/ICIcon.dart';
 import 'package:xml/xml.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import 'package:infinicard_v1/objects/ICButtonStyle.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
 import 'package:infinicard_v1/functions/helpers.dart';
 

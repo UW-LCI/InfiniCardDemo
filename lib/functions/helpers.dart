@@ -273,7 +273,7 @@ void onPressed(Map? action){
   }
 
 Map getAction(XmlElement onPressedElement){
-  var action = Map();
+  var action = {};
   action['type'] = null;
   action['target'] = null;
   var typeElement = onPressedElement.getElement('type');

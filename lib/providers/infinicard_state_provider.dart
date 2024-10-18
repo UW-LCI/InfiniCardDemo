@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
-import 'package:xml/xml_events.dart';
 
 class InfinicardStateProvider extends ChangeNotifier{
   String source = "";

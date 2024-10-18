@@ -12,7 +12,7 @@ ICColumn getColumn(XmlElement child, BuildContext context){
   var columnChildList = columnChildren != null ? columnChildren.childElements : const Iterable.empty();
   for(var columnChild in columnChildList){
     var childElement = getUIElement(columnChild, context);
-    if(childElement != null) children.add(childElement);
+    children.add(childElement);
   }
   var column = ICColumn(children);
 

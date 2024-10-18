@@ -3,7 +3,7 @@ import 'package:infinicard_v1/objects/ICColor.dart';
 import 'package:xml/xml.dart';
 
 class ICButtonStyle {
-  MaterialStateProperty<Color>? backgroundColor;
+  WidgetStateProperty<Color>? backgroundColor;
 
   ICColor? bgColor = ICColor("");
   ICColor? bgPressed;
@@ -14,19 +14,19 @@ class ICButtonStyle {
     bgPressed = pressed;
     bgHovered = hovered;
     
-    Set<MaterialState> states = {};
-    if (pressed != null) {states.add(MaterialState.pressed);}
-    if (hovered != null) {states.add(MaterialState.hovered);}
+    Set<WidgetState> states = {};
+    if (pressed != null) {states.add(WidgetState.pressed);}
+    if (hovered != null) {states.add(WidgetState.hovered);}
     
-    backgroundColor = MaterialStateProperty.resolveWith(getColorForStates);
+    backgroundColor = WidgetStateProperty.resolveWith(getColorForStates);
   }
 
-  Color getColorForStates(Set<MaterialState> states){
-    if(states.contains(MaterialState.pressed)){
+  Color getColorForStates(Set<WidgetState> states){
+    if(states.contains(WidgetState.pressed)){
       var pressedColor = bgPressed?.toFlutter();
       if(pressedColor != null){return pressedColor;}
       }
-    if(states.contains(MaterialState.hovered)){
+    if(states.contains(WidgetState.hovered)){
       var hoveredColor = bgHovered?.toFlutter();
       if(hoveredColor != null){return hoveredColor;}
       }

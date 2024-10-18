@@ -72,7 +72,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
   void _recognizeGesture() async {
       var flattenedStrokes = _strokes.expand((stroke) => stroke).toList();
       var candidate = MultiStrokePath(flattenedStrokes);
-      var result = await _dollarQ.recognize(candidate);
+      var result = _dollarQ.recognize(candidate);
 
       if (result.isNotEmpty) {
         var score = result['score'] as double;

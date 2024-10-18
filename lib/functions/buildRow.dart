@@ -12,7 +12,7 @@ ICRow getRow(XmlElement child, BuildContext context){
   var rowChildList = rowChildren != null ? rowChildren.childElements : const Iterable.empty();
   for(XmlElement rowChild in rowChildList){
     var childElement = getUIElement(rowChild, context);
-    if(childElement != null) children.add(childElement);
+    children.add(childElement);
   }
   
   var row = ICRow(children);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:xml/xml.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:infinicard_v1/objects/ICText.dart';
 import 'package:infinicard_v1/objects/ICButtonStyle.dart';

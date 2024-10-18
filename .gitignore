@@ -61,7 +61,7 @@ app.*.map.json
 **/ios/.generated/
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
-**/ios/Flutter/Generated.xcconfig
+# **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
 **/ios/Flutter/flutter_assets/
@@ -70,9 +70,9 @@ app.*.map.json
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
-**/macos/Flutter/Flutter-Debug.xcconfig
-**/macos/Flutter/Flutter-Release.xcconfig
-**/macos/Flutter/Flutter-Profile.xcconfig
+# **/macos/Flutter/Flutter-Debug.xcconfig
+# **/macos/Flutter/Flutter-Release.xcconfig
+# **/macos/Flutter/Flutter-Profile.xcconfig
 
 # Coverage
 coverage/
