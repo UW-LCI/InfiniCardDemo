@@ -51,7 +51,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
   }
 
   void _handlePointerUp(PointerUpEvent event) {
-    _recognizeGesture();
+    // _recognizeGesture();
   }
 
   GesturePoint _createPoint(PointerEvent event) {
