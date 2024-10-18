@@ -4,6 +4,7 @@ import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import '../widgets/canvas_widget.dart';
 
 class SourceEditor extends StatefulWidget {
   const SourceEditor({super.key});
@@ -45,6 +46,12 @@ class _SourceEditorState extends State<SourceEditor> {
             child: Column(
           children: [
             Row(children: [
+              TextButton(
+                  onPressed: () {
+                    _textController.text = recognize();
+                    _compileSource(context, _textController.text);
+                  },
+                  child: const Text("Compile from Drawing")),
               TextButton(
                   onPressed: () {
                     _textController.text = _getSource(context, true);
