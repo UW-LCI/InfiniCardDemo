@@ -191,7 +191,7 @@ class _CanvasPainter extends CustomPainter {
   _CanvasPainter(this.strokes);
 
 
-  // Possible bug here, drawing path cannot properly handle angles.
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
