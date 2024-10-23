@@ -50,9 +50,9 @@ class _SourceEditorState extends State<SourceEditor> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-            child: Column(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
           children: [
             Row(children: [
               TextButton(
@@ -137,12 +137,14 @@ class _SourceEditorState extends State<SourceEditor> {
               controller: _textController,
               initialValue: null,
               keyboardType: TextInputType.multiline,
-              minLines: 1, //Normal textInputField will be displayed
+              minLines: 1,
               maxLines: null,
               onChanged: (s) => _compileSource(context, s),
             )
           ],
-        )));
+        )
+      )
+    );
   }
 
   void loadItems(Box? uiEntries) {

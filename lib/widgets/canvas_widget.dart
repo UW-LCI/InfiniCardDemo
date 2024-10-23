@@ -103,11 +103,10 @@ class CanvasWidgetState extends State<CanvasWidget> {
     infinicardProvider.pendingAction = NullAction();
   }
 
-  // This is for DOLLARQ recognition, we can ignore this for now
   Future<String> _recognizeGesture() async {
-      var flattenedStrokes = _strokes.expand((stroke) => stroke).toList();
-      var candidate = MultiStrokePath(flattenedStrokes);
-      var result = _dollarQ.recognize(candidate);
+    var flattenedStrokes = _strokes.expand((stroke) => stroke).toList();
+    var candidate = MultiStrokePath(flattenedStrokes);
+    var result = _dollarQ.recognize(candidate);
 
     if (result.isNotEmpty) {
       // var score = result['score'] as double;

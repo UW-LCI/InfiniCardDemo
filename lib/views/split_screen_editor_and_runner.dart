@@ -4,13 +4,13 @@ import 'package:infinicard_v1/views/source_editor.dart';
 import 'package:infinicard_v1/widgets/canvas_widget.dart';
 import 'package:split_view/split_view.dart';
 import 'package:infinicard_v1/views/canvas.dart';
+import 'package:infinicard_v1/widgets/canvas_widget.dart';
 
 class SplitScreenEditorAndRunner extends StatefulWidget {
   const SplitScreenEditorAndRunner({super.key});
 
   @override
   State<SplitScreenEditorAndRunner> createState() => _SplitScreenEditorAndRunnerState();
-
 }
 
 class _SplitScreenEditorAndRunnerState extends State<SplitScreenEditorAndRunner> {

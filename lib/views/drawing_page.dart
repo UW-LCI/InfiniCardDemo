@@ -3,7 +3,6 @@ import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:provider/provider.dart';
 import '../widgets/canvas_widget.dart';
 import '../widgets/control_panel_widget.dart';
-import '../models/dollar_q.dart';
 
 class DrawingPage extends StatefulWidget {
   final GlobalKey<CanvasWidgetState> canvasKey;
@@ -14,11 +13,8 @@ class DrawingPage extends StatefulWidget {
 }
 
 class _DrawingPageState extends State<DrawingPage> {
-  // Create a GlobalKey to access the CanvasWidget's state
-  final GlobalKey<CanvasWidgetState> _canvasKey = GlobalKey<CanvasWidgetState>();
 
-  // Method to handle recognition results
-    void _onRecognitionComplete(String xml) {
+  void _onRecognitionComplete(String xml) {
     if (xml.isNotEmpty) {
       Provider.of<InfinicardStateProvider>(context, listen: false)
           .updateSource(xml);
@@ -115,6 +111,7 @@ class _DrawingPageState extends State<DrawingPage> {
             // onRedo: () {
             //   widget.canvasKey.currentState?.redo();
             // },
+
             // onDraw: () {
             //   _canvasKey.currentState?.draw();
             // },

@@ -4,7 +4,7 @@ import 'package:infinicard_v1/widgets/canvas_widget.dart';
 
 class CanvasView extends StatelessWidget {
   final GlobalKey<CanvasWidgetState> canvasKey;
-  
+
   const CanvasView({super.key, required this.canvasKey});
 
   @override
