@@ -8,7 +8,7 @@ import '../widgets/canvas_widget.dart';
 
 class SourceEditor extends StatefulWidget {
   final GlobalKey<CanvasWidgetState> canvasKey;
-
+  
   const SourceEditor({super.key, required this.canvasKey});
 
   @override
@@ -58,7 +58,8 @@ class _SourceEditorState extends State<SourceEditor> {
               TextButton(
                 onPressed: () async {
                   if (widget.canvasKey.currentState != null) {
-                    String xml = await widget.canvasKey.currentState!.recognize();
+                    // String xml = await widget.canvasKey.currentState!.recognize();
+                    String xml = "<root></root>";
                     _compileFromDrawing(xml);
                   }
                   else {

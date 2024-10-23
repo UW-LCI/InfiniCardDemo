@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
+import 'package:provider/provider.dart';
 import '../widgets/canvas_widget.dart';
 import '../widgets/control_panel_widget.dart';
-import 'package:provider/provider.dart';
-import '../providers/infinicard_state_provider.dart';
 
 class DrawingPage extends StatefulWidget {
   final GlobalKey<CanvasWidgetState> canvasKey;
@@ -85,32 +85,33 @@ class _DrawingPageState extends State<DrawingPage> {
             ),
           ),
           ControlPanelWidget(
-            onClear: () {
-              widget.canvasKey.currentState?.clearCanvas();
-            },
+            // onClear: () {
+            //   widget.canvasKey.currentState?.clearCanvas();
+            // },
             onRecognize: () {
               widget.canvasKey.currentState?.recognizeGesture();
             },
-            onSave: () async {
-              String? name = await _promptForGestureName(context);
-              if (name != null && name.trim().isNotEmpty) {
-                widget.canvasKey.currentState?.saveGesture(name.trim());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Gesture "$name" saved successfully')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Gesture name cannot be empty')),
-                );
-              }
-            },
-            onUndo: () {
-              widget.canvasKey.currentState?.undo();
+            // onSave: () async {
+            //   String? name = await _promptForGestureName(context);
+            //   if (name != null && name.trim().isNotEmpty) {
+            //     widget.canvasKey.currentState?.saveGesture(name.trim());
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(content: Text('Gesture "$name" saved successfully')),
+            //     );
+            //   } else {
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       const SnackBar(content: Text('Gesture name cannot be empty')),
+            //     );
+            //   }
+            // },
+            // onUndo: () {
+            //   widget.canvasKey.currentState?.undo();
 
-            },
-            onRedo: () {
-              widget.canvasKey.currentState?.redo();
-            },
+            // },
+            // onRedo: () {
+            //   widget.canvasKey.currentState?.redo();
+            // },
+
             // onDraw: () {
             //   _canvasKey.currentState?.draw();
             // },

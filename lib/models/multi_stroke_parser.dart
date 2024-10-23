@@ -79,7 +79,7 @@ class MultiStrokeParser {
           double? pressure =
               double.tryParse(pointElement.getAttribute('Pressure') ?? '');
 
-          currentStroke.add(GesturePoint(x, y, strokeIndex, time, pressure));
+          currentStroke.add(GesturePoint(x, y, time, pressure));
         }
 
         strokes.add(currentStroke);

@@ -12,9 +12,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const drawAreaWidth = 400.0;
+    const drawAreaHeight = 400.00;
+
     return MaterialApp(
       home: ChangeNotifierProvider(
-        create: (context) => InfinicardStateProvider(),
+        create: (context) => InfinicardStateProvider(width:drawAreaWidth, height:drawAreaHeight),
         child: const SplitScreenEditorAndRunner(),
       ),
     );

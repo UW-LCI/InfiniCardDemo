@@ -2,12 +2,12 @@ import 'dart:math';
 
 class GesturePoint {
   double x, y;
-  int strokeId;
+  // int? strokeId;
   double? time;
   double? pressure;
-  int index;
+  int? index;
 
-  GesturePoint(this.x, this.y, this.strokeId,
+  GesturePoint(this.x, this.y,
       [this.time, this.pressure, this.index = -1]);
 
   double distanceTo(GesturePoint other) {
@@ -101,7 +101,7 @@ class DollarQ {
         var qx = points[i - 1].x + t * (points[i].x - points[i - 1].x);
         var qy = points[i - 1].y + t * (points[i].y - points[i - 1].y);
         var q = GesturePoint(
-            qx, qy, points[i].strokeId, points[i].time, points[i].pressure);
+            qx, qy, points[i].time, points[i].pressure);
         newPoints.add(q);
         D = 0.0;
       } else {
@@ -120,7 +120,7 @@ class DollarQ {
   List<GesturePoint> translateToOrigin(List<GesturePoint> points) {
     var centroid = calculateCentroid(points);
     return points
-        .map((p) => GesturePoint(p.x - centroid.x, p.y - centroid.y, p.strokeId,
+        .map((p) => GesturePoint(p.x - centroid.x, p.y - centroid.y,
             p.time, p.pressure, p.index))
         .toList();
   }
@@ -145,7 +145,6 @@ class DollarQ {
         .map((p) => GesturePoint(
             (p.x - minX) * (m - 1) / size,
             (p.y - minY) * (m - 1) / size,
-            p.strokeId,
             p.time,
             p.pressure,
             p.index))

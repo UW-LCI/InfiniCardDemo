@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/views/infinicard_viewer.dart';
 import 'package:infinicard_v1/views/source_editor.dart';
+import 'package:infinicard_v1/widgets/canvas_widget.dart';
 import 'package:split_view/split_view.dart';
 import 'package:infinicard_v1/views/canvas.dart';
 import 'package:infinicard_v1/widgets/canvas_widget.dart';
