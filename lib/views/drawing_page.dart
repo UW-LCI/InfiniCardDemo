@@ -105,6 +105,20 @@ class _DrawingPageState extends State<DrawingPage> {
                 );
               }
             },
+            onUndo: () {
+              _canvasKey.currentState?.undo();
+
+            },
+            onRedo: () {
+              _canvasKey.currentState?.redo();
+            },
+            // onDraw: () {
+            //   _canvasKey.currentState?.draw();
+            // },
+            // onErase: () {
+            //   _canvasKey.currentState?.erase();
+
+            // }
           ),
         ],
       ),

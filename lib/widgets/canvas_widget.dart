@@ -23,9 +23,12 @@ class CanvasWidget extends StatefulWidget {
 }
 
 class CanvasWidgetState extends State<CanvasWidget> {
-  final List<List<GesturePoint>> _strokes = [];
+  List<List<GesturePoint>> _strokes = [];
+  List<List<GesturePoint>> _undoQueue = [];
+  List<List<GesturePoint>> _clearedStrokes = [];
   List<GesturePoint> _currentStroke = [];
   late DollarQ _dollarQ;
+  // String mode = "draw";
 
   @override
   void initState() {
@@ -113,7 +116,10 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
   void _clear() {
     setState(() {
+      _clearedStrokes = List.from(_strokes);
       _strokes.clear();
+      _undoQueue.clear();
+
     });
     widget.onRecognitionComplete('');
   }
@@ -122,6 +128,36 @@ class CanvasWidgetState extends State<CanvasWidget> {
   void clearCanvas() {
     _clear();
   }
+
+  void undo(){
+    setState(() {
+      if(_clearedStrokes.isNotEmpty && _strokes.isEmpty){
+        _strokes = List.from(_clearedStrokes);
+        _clearedStrokes.clear();
+      }
+      else if(_strokes.isNotEmpty){
+        List<GesturePoint> last = _strokes.removeLast();
+        _undoQueue.add(last);
+      }
+    });
+  }
+
+  void redo(){
+      setState(() {
+        if(_undoQueue.isNotEmpty){
+          List<GesturePoint> last = _undoQueue.removeLast();
+          _strokes.add(last);
+        }
+      });
+  }
+
+  // void draw(){
+  //   mode = "draw";
+  // }
+
+  // void erase(){
+  //   mode = "erase";
+  // }
 
   String recognizeGesture() {
     // String result = await _recognizeGesture();
@@ -190,15 +226,13 @@ class _CanvasPainter extends CustomPainter {
 
   _CanvasPainter(this.strokes);
 
-
-
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 5.0;
-    paint.style = PaintingStyle.stroke;
+        ..color = const Color.fromARGB(255, 0, 0, 0)
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 5.0;
+      paint.style = PaintingStyle.stroke;
     for (final stroke in strokes) {
       if (stroke.length > 1) {
         var path = Path();
