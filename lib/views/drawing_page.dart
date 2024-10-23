@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
+import 'package:provider/provider.dart';
 import '../widgets/canvas_widget.dart';
 import '../widgets/control_panel_widget.dart';
+import '../models/dollar_q.dart';
 
 class DrawingPage extends StatefulWidget {
-  const DrawingPage({super.key});
+  final GlobalKey<CanvasWidgetState> canvasKey;
+  const DrawingPage({super.key, required this.canvasKey});
 
   @override
   _DrawingPageState createState() => _DrawingPageState();
@@ -14,11 +18,14 @@ class _DrawingPageState extends State<DrawingPage> {
   final GlobalKey<CanvasWidgetState> _canvasKey = GlobalKey<CanvasWidgetState>();
 
   // Method to handle recognition results
-    void _onRecognitionComplete(String result) {
-    if (result.isNotEmpty) {
+    void _onRecognitionComplete(String xml) {
+    if (xml.isNotEmpty) {
+      Provider.of<InfinicardStateProvider>(context, listen: false)
+          .updateSource(xml);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result),
+          content: const Text('Recognition completed'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -72,46 +79,42 @@ class _DrawingPageState extends State<DrawingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Drawing Recognition App'),
-      ),
+      appBar: AppBar(title: const Text('Drawing Recognition')),
       body: Column(
         children: [
-          // Expanded widget to make CanvasWidget take available space
           Expanded(
             child: CanvasWidget(
-              key: _canvasKey,
+              key: widget.canvasKey,
               onRecognitionComplete: _onRecognitionComplete,
             ),
           ),
-          // ControlPanelWidget with callbacks
           ControlPanelWidget(
-            onClear: () {
-              _canvasKey.currentState?.clearCanvas();
-            },
+            // onClear: () {
+            //   widget.canvasKey.currentState?.clearCanvas();
+            // },
             onRecognize: () {
-              _canvasKey.currentState?.recognizeGesture();
+              widget.canvasKey.currentState?.recognizeGesture();
             },
-            onSave: () async {
-              String? name = await _promptForGestureName(context);
-              if (name != null && name.trim().isNotEmpty) {
-                _canvasKey.currentState?.saveGesture(name.trim());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Gesture "$name" saved successfully')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Gesture name cannot be empty')),
-                );
-              }
-            },
-            onUndo: () {
-              _canvasKey.currentState?.undo();
+            // onSave: () async {
+            //   String? name = await _promptForGestureName(context);
+            //   if (name != null && name.trim().isNotEmpty) {
+            //     widget.canvasKey.currentState?.saveGesture(name.trim());
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(content: Text('Gesture "$name" saved successfully')),
+            //     );
+            //   } else {
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       const SnackBar(content: Text('Gesture name cannot be empty')),
+            //     );
+            //   }
+            // },
+            // onUndo: () {
+            //   widget.canvasKey.currentState?.undo();
 
-            },
-            onRedo: () {
-              _canvasKey.currentState?.redo();
-            },
+            // },
+            // onRedo: () {
+            //   widget.canvasKey.currentState?.redo();
+            // },
             // onDraw: () {
             //   _canvasKey.currentState?.draw();
             // },

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'dart:ui' as ui;
+import 'package:infinicard_v1/functions/buildApp.dart';
+import 'package:infinicard_v1/models/draw_actions/line_action.dart';
+import 'package:infinicard_v1/models/draw_actions/null_action.dart';
+import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
+import 'package:infinicard_v1/models/multi_stroke_write.dart';
+import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
+import 'package:provider/provider.dart';
 import '../models/multi_stroke_parser.dart';
 import '../models/dollar_q.dart';
-import '../models/multi_stroke_write.dart';
-
-String recognize(){
-  CanvasWidgetState canvasWidgetState = CanvasWidgetState();
-  Map<dynamic, dynamic> dictionary = canvasWidgetState.stringToDictionary();
-  String xml = canvasWidgetState.dictionaryToXML(dictionary);
-  // print(xml);
-  return xml;
-}
+import '../widgets/canvas_painter.dart';
 
 class CanvasWidget extends StatefulWidget {
   final Function(String) onRecognitionComplete;
@@ -24,9 +22,9 @@ class CanvasWidget extends StatefulWidget {
 
 class CanvasWidgetState extends State<CanvasWidget> {
   List<List<GesturePoint>> _strokes = [];
-  List<List<GesturePoint>> _undoQueue = [];
-  List<List<GesturePoint>> _clearedStrokes = [];
-  List<GesturePoint> _currentStroke = [];
+  // List<List<GesturePoint>> _undoQueue = [];
+  // List<List<GesturePoint>> _clearedStrokes = [];
+  // StrokeAction _currentStroke;
   late DollarQ _dollarQ;
   // String mode = "draw";
 
@@ -47,36 +45,62 @@ class CanvasWidgetState extends State<CanvasWidget> {
     }
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
-    setState(() {
-      _currentStroke = [_createPoint(event)];
-      _strokes.add(_currentStroke);
-    });
-  }
-
-  void _handlePointerMove(PointerMoveEvent event) {
-    setState(() {
-      _currentStroke.add(_createPoint(event));
-      _strokes[_strokes.length - 1] = List.from(_currentStroke);
-    });
-  }
-
-  void _handlePointerUp(PointerUpEvent event) {
-    // _recognizeGesture();
-  }
-
   GesturePoint _createPoint(PointerEvent event) {
     double? pressure;
     if (event.kind == PointerDeviceKind.stylus) {
       pressure = (event.pressure * 255).round().toDouble();
     }
-    return GesturePoint(
-      event.localPosition.dx,
-      event.localPosition.dy,
-      _strokes.length - 1, // strokeId
-      event.timeStamp.inMilliseconds.toDouble(),
-      pressure
-    );
+    return GesturePoint(event.localPosition.dx, event.localPosition.dy,
+        event.timeStamp.inMilliseconds.toDouble(), pressure);
+  }
+
+  void _handlePointerDown(
+      PointerDownEvent event, InfinicardStateProvider infinicardProvider) {
+    switch (infinicardProvider.toolSelected) {
+      case Tools.none:
+        infinicardProvider.pendingAction = NullAction();
+        break;
+      case Tools.stroke:
+        infinicardProvider.pendingAction = StrokeAction([_createPoint(event)]);
+        break;
+      case Tools.line:
+        infinicardProvider.pendingAction = LineAction(
+          _createPoint(event),
+          _createPoint(event,
+          )
+        );
+        break;
+    }
+  }
+
+  void _handlePointerMove(
+      PointerMoveEvent event, InfinicardStateProvider infinicardProvider) {
+    // setState(() {
+    //   _currentStroke.add(_createPoint(event));
+    //   _strokes[_strokes.length - 1] = List.from(_currentStroke);
+    // });
+
+    switch (infinicardProvider.toolSelected) {
+      case Tools.none:
+        break;
+      case Tools.stroke:
+        final pendingAction = infinicardProvider.pendingAction as StrokeAction;
+        pendingAction.points.add(_createPoint(event));
+        infinicardProvider.pendingAction = StrokeAction(pendingAction.points);
+        break;
+      case Tools.line:
+        final pendingAction = infinicardProvider.pendingAction as LineAction;
+        infinicardProvider.pendingAction = LineAction(
+          pendingAction.point1,
+          _createPoint(event)
+        );
+    }
+  }
+
+  void _handlePointerUp(
+      PointerUpEvent event, InfinicardStateProvider infinicardProvider) {
+    infinicardProvider.add(infinicardProvider.pendingAction);
+    infinicardProvider.pendingAction = NullAction();
   }
 
   // This is for DOLLARQ recognition, we can ignore this for now
@@ -85,17 +109,20 @@ class CanvasWidgetState extends State<CanvasWidget> {
       var candidate = MultiStrokePath(flattenedStrokes);
       var result = _dollarQ.recognize(candidate);
 
-      if (result.isNotEmpty) {
-        // var score = result['score'] as double;
-        var templateIndex = result['templateIndex'] as int;
-        var templateName = _dollarQ.templates[templateIndex].name;
-        widget.onRecognitionComplete('Recognized: $templateName');
-        return templateName;
-      } else {
-        widget.onRecognitionComplete('No match found');
-        return 'Unknown';
+    if (result.isNotEmpty) {
+      // var score = result['score'] as double;
+      var templateIndex = result['templateIndex'] as int;
+      var templateName = _dollarQ.templates[templateIndex].name;
+      if (templateName == 'button') {
+        templateName = 'textButton';
       }
+      widget.onRecognitionComplete('Recognized: $templateName');
+      return templateName;
+    } else {
+      widget.onRecognitionComplete('No match found');
+      return 'Unknown';
     }
+  }
 
   Future<void> _saveGesture(String name) async {
     var flattenedStrokes = _strokes.expand((stroke) => stroke).toList();
@@ -112,141 +139,95 @@ class CanvasWidgetState extends State<CanvasWidget> {
       print("Error saving gesture: $e");
     }
   }
-  // End of DOLLAR Q recognition
+  //End of DOLLAR Q recognition
 
-  void _clear() {
-    setState(() {
-      _clearedStrokes = List.from(_strokes);
-      _strokes.clear();
-      _undoQueue.clear();
-
-    });
-    widget.onRecognitionComplete('');
-  }
-
-  // Public methods to be accessed from parent
-  void clearCanvas() {
-    _clear();
-  }
-
-  void undo(){
-    setState(() {
-      if(_clearedStrokes.isNotEmpty && _strokes.isEmpty){
-        _strokes = List.from(_clearedStrokes);
-        _clearedStrokes.clear();
-      }
-      else if(_strokes.isNotEmpty){
-        List<GesturePoint> last = _strokes.removeLast();
-        _undoQueue.add(last);
-      }
-    });
-  }
-
-  void redo(){
-      setState(() {
-        if(_undoQueue.isNotEmpty){
-          List<GesturePoint> last = _undoQueue.removeLast();
-          _strokes.add(last);
-        }
-      });
-  }
-
-  // void draw(){
-  //   mode = "draw";
-  // }
-
-  // void erase(){
-  //   mode = "erase";
+  // void _clear() {
+  //   widget.onRecognitionComplete('');
   // }
 
   String recognizeGesture() {
     // String result = await _recognizeGesture();
     String result = '';
-    _recognizeGesture().then(
-      (String value) {
-        setState(() {
-          print("Value: $value");
-          result = value.toString();
-        });
-      }
-    );
+    _recognizeGesture().then((String value) {
+      setState(() {
+        print("Value: $value");
+        result = value.toString();
+      });
+    });
     return result;
   }
 
+  // Future<void> saveGesture(String name) async {
+  //   await _saveGesture(name);
+  // }
 // {root: {ui: {image: {path: }, text: {data: Text}, textbutton: }}}
 
   // Future<String> -> XML
   Map<dynamic, dynamic> stringToDictionary() {
-    Map<String, dynamic> dictionary = {"root": {"ui": {}}};
+    Map<String, dynamic> dictionary = {
+      "root": {"ui": {}}
+    };
     String gesture = recognizeGesture();
     dictionary["root"]["ui"] = {gesture: {}};
     return dictionary;
   }
 
   String dictionaryToXML(Map<dynamic, dynamic> dictionary) {
-    String xml = "";
-    dictionary.forEach((key, value) {
-      xml += "<$key>";
-      if (value is Map) {
-        xml += dictionaryToXML(value);
-      } else {
-        xml += value.toString();
-      }
-      xml += "</$key>";
-    });
-    return xml;
-  }
-
-
-  Future<void> saveGesture(String name) async {
-    await _saveGesture(name);
-  }
-
-  // Build the canvas widget (VIEW)
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerMove: _handlePointerMove,
-      onPointerUp: _handlePointerUp,
-      child: CustomPaint(
-        painter: _CanvasPainter(_strokes),
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          color: const Color.fromARGB(0, 12, 11, 11),
-        ),
-      ),
-    );
-  }
-}
-
-class _CanvasPainter extends CustomPainter {
-  final List<List<GesturePoint>> strokes;
-
-  _CanvasPainter(this.strokes);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-        ..color = const Color.fromARGB(255, 0, 0, 0)
-        ..strokeCap = StrokeCap.round
-        ..strokeWidth = 5.0;
-      paint.style = PaintingStyle.stroke;
-    for (final stroke in strokes) {
-      if (stroke.length > 1) {
-        var path = Path();
-        path.moveTo(stroke[0].x, stroke[0].y);
-        for (var i = 1; i < stroke.length; i++) {
-          path.lineTo(stroke[i].x, stroke[i].y);
+    try {
+      String xml = "";
+      dictionary.forEach((key, value) {
+        xml += "<$key>";
+        if (value is Map) {
+          xml += dictionaryToXML(value);
+        } else {
+          xml += value.toString();
         }
-        canvas.drawPath(path, paint);
-      } else if (stroke.length == 1) {
-        canvas.drawPoints(ui.PointMode.points, [Offset(stroke[0].x, stroke[0].y)], paint);
-      }
+        xml += "</$key>";
+      });
+      return xml;
+    } catch (e) {
+      debugPrint("XML generation error: $e");
+      return "<root><ui></ui></root>";
     }
   }
 
+  // void clear() {
+  //   setState(() {
+  //     _strokes.clear();
+  //   });
+  //   widget.onRecognitionComplete('');
+  // }
+
+  // Future<String> recognize() async {
+  //   String result = await _recognizeGesture();
+  //   if (result.isNotEmpty) {
+  //     Map<dynamic, dynamic> dictionary = {"root": {"ui": {}}};
+  //     dictionary["root"]["ui"] = {result: {}};
+  //     String xml = dictionaryToXML(dictionary);
+  //     return xml;
+  //   }
+  //   return "<root><ui></ui></root>";
+  // }
+
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  Widget build(BuildContext context) {
+    return Consumer<InfinicardStateProvider>(
+        builder: (context, infinicardProvider, unchangingChild) {
+      return Listener(
+        onPointerDown: (event) => _handlePointerDown(event, infinicardProvider),
+        onPointerMove: (event) => _handlePointerMove(event, infinicardProvider),
+        onPointerUp: (event) => _handlePointerUp(event, infinicardProvider),
+        child: CustomPaint(
+          foregroundPainter: CanvasPainter(infinicardProvider),
+          child: Scaffold(body: Container(
+            width: infinicardProvider.width,
+            height: infinicardProvider.width,
+            color: Colors.transparent,
+            child:unchangingChild
+          ),
+          ),
+        ),
+      );
+    });
+  }
 }

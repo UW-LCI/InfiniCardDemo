@@ -66,8 +66,10 @@ class MultiStrokeWrite {
   /// Groups a list of GesturePoints by their strokeId.
   Map<int, List<GesturePoint>> groupByStroke(List<GesturePoint> points) {
     Map<int, List<GesturePoint>> grouped = {};
+    int i = 0;
     for (var point in points) {
-      grouped.putIfAbsent(point.strokeId, () => []).add(point);
+      grouped.putIfAbsent(i, () => []).add(point);
+      i++;
     }
     return grouped;
   }

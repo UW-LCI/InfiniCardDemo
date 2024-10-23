@@ -7,7 +7,9 @@ import 'package:uuid/uuid.dart';
 import '../widgets/canvas_widget.dart';
 
 class SourceEditor extends StatefulWidget {
-  const SourceEditor({super.key});
+  final GlobalKey<CanvasWidgetState> canvasKey;
+  
+  const SourceEditor({super.key, required this.canvasKey});
 
   @override
   State<SourceEditor> createState() => _SourceEditorState();
@@ -38,6 +40,13 @@ class _SourceEditorState extends State<SourceEditor> {
     return await Hive.openBox("UI");
   }
 
+  void _compileFromDrawing(String xml) {
+    if (xml.isNotEmpty) {
+      _textController.text = xml;
+      _compileSource(context, xml);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -47,11 +56,17 @@ class _SourceEditorState extends State<SourceEditor> {
           children: [
             Row(children: [
               TextButton(
-                  onPressed: () {
-                    _textController.text = recognize();
-                    _compileSource(context, _textController.text);
-                  },
-                  child: const Text("Compile from Drawing")),
+                onPressed: () async {
+                  if (widget.canvasKey.currentState != null) {
+                    // String xml = await widget.canvasKey.currentState!.recognize();
+                    String xml = "<root></root>";
+                    _compileFromDrawing(xml);
+                  }
+                  else {
+                    debugPrint("Canvas key is null");
+                  }
+                },
+                child: const Text("Compile from Drawing")),
               TextButton(
                   onPressed: () {
                     _textController.text = _getSource(context, true);
