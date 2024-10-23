@@ -7,7 +7,9 @@ import 'package:uuid/uuid.dart';
 import '../widgets/canvas_widget.dart';
 
 class SourceEditor extends StatefulWidget {
-  const SourceEditor({super.key});
+  final GlobalKey<CanvasWidgetState> canvasKey;
+
+  const SourceEditor({super.key, required this.canvasKey});
 
   @override
   State<SourceEditor> createState() => _SourceEditorState();
@@ -38,20 +40,32 @@ class _SourceEditorState extends State<SourceEditor> {
     return await Hive.openBox("UI");
   }
 
+  void _compileFromDrawing(String xml) {
+    if (xml.isNotEmpty) {
+      _textController.text = xml;
+      _compileSource(context, xml);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-            child: Column(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
           children: [
             Row(children: [
               TextButton(
-                  onPressed: () {
-                    _textController.text = recognize();
-                    _compileSource(context, _textController.text);
-                  },
-                  child: const Text("Compile from Drawing")),
+                onPressed: () async {
+                  if (widget.canvasKey.currentState != null) {
+                    String xml = await widget.canvasKey.currentState!.recognize();
+                    _compileFromDrawing(xml);
+                  }
+                  else {
+                    debugPrint("Canvas key is null");
+                  }
+                },
+                child: const Text("Compile from Drawing")),
               TextButton(
                   onPressed: () {
                     _textController.text = _getSource(context, true);
@@ -122,12 +136,14 @@ class _SourceEditorState extends State<SourceEditor> {
               controller: _textController,
               initialValue: null,
               keyboardType: TextInputType.multiline,
-              minLines: 1, //Normal textInputField will be displayed
+              minLines: 1,
               maxLines: null,
               onChanged: (s) => _compileSource(context, s),
             )
           ],
-        )));
+        )
+      )
+    );
   }
 
   void loadItems(Box? uiEntries) {
