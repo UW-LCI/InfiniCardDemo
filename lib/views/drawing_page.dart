@@ -21,7 +21,7 @@ class _DrawingPageState extends State<DrawingPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Recognition completed'),
+          content: const Text('Recognition completed'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -105,11 +105,11 @@ class _DrawingPageState extends State<DrawingPage> {
               }
             },
             onUndo: () {
-              _canvasKey.currentState?.undo();
+              widget.canvasKey.currentState?.undo();
 
             },
             onRedo: () {
-              _canvasKey.currentState?.redo();
+              widget.canvasKey.currentState?.redo();
             },
             // onDraw: () {
             //   _canvasKey.currentState?.draw();
