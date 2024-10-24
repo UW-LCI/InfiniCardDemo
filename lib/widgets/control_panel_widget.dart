@@ -56,6 +56,10 @@ class ControlPanelWidget extends StatelessWidget {
             onPressed: () => _stroke(context),
             child: const Icon(Icons.brush),
           ),
+          ElevatedButton(
+            onPressed: () => _erase(context),
+            child: const Icon(Icons.auto_fix_normal),
+          ),
           // ElevatedButton(
           //   onPressed: onDraw,
           //   child: const Icon(Icons.create),
@@ -96,5 +100,10 @@ class ControlPanelWidget extends StatelessWidget {
   void _stroke(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.stroke;
+  }
+
+  void _erase(BuildContext context){
+    final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
+    provider.toolSelected = Tools.erase;
   }
 }

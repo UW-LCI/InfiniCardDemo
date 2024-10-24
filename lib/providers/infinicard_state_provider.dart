@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
+import 'package:infinicard_v1/models/draw_actions/line_action.dart';
+import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/drawing.dart';
-enum Tools { none, stroke, line }
+enum Tools { none, stroke, line, erase }
 class InfinicardStateProvider extends ChangeNotifier{
 
   String source = "";
@@ -91,6 +93,34 @@ class InfinicardStateProvider extends ChangeNotifier{
   clear(){
     add(ClearAction());
     _invalidateAndNotify();
+  }
+
+  erase(DrawAction eraseAction) {
+    List<DrawAction> erasableActions = [];
+    final futureIndexOfLastClearAction = _pastActions.lastIndexWhere((element) => element is ClearAction);
+    if (futureIndexOfLastClearAction == -1){ // never been cleared
+      erasableActions = _pastActions;
+    } else {
+      final erasableActions = _pastActions.getRange(futureIndexOfLastClearAction, _pastActions.length).toList();
+    }
+
+    for (DrawAction action in erasableActions){
+      switch(action){
+        case ClearAction _:
+          debugPrint("clear");
+          break;
+        case NullAction _:
+          debugPrint("null");
+          break;
+        case StrokeAction _:
+          debugPrint("stroke");
+          break;
+        case LineAction _:
+          debugPrint("line");
+          break;
+      }
+    }
+
   }
 
   //Render Methods
