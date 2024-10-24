@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
+import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/null_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
@@ -70,6 +71,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
           )
         );
         break;
+      case Tools.erase:
+        infinicardProvider.pendingAction = EraseAction([_createPoint(event)]);
+        break;
     }
   }
 
@@ -94,12 +98,20 @@ class CanvasWidgetState extends State<CanvasWidget> {
           pendingAction.point1,
           _createPoint(event)
         );
+      case Tools.erase:
+        final pendingAction = infinicardProvider.pendingAction as EraseAction;
+        pendingAction.points.add(_createPoint(event));
+        infinicardProvider.pendingAction = EraseAction(pendingAction.points);
+        break;
     }
   }
 
   void _handlePointerUp(
       PointerUpEvent event, InfinicardStateProvider infinicardProvider) {
     infinicardProvider.add(infinicardProvider.pendingAction);
+    if(infinicardProvider.toolSelected == Tools.erase){
+      infinicardProvider.erase(infinicardProvider.pendingAction);
+    }
     infinicardProvider.pendingAction = NullAction();
   }
 
