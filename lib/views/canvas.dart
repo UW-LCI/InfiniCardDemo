@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/models/canvasTheme.dart';
 import 'package:infinicard_v1/views/drawing_page.dart';
 import 'package:infinicard_v1/widgets/canvas_widget.dart';
 
@@ -13,6 +14,7 @@ class CanvasView extends StatelessWidget {
       title: 'Drawing Recognition App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: CanvasTheme.backgroundColor,
       ),
       home: DrawingPage(canvasKey: canvasKey),
     );

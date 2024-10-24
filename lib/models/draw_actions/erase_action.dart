@@ -9,5 +9,17 @@ import '../draw_actions.dart';
 class EraseAction extends DrawAction {
   final List<GesturePoint> points;
 
+  Path strokePath = Path();
+
   EraseAction(this.points);
+
+  List<DrawAction> erased = []; 
+
+  void addLine(GesturePoint point){
+    strokePath.lineTo(point.x, point.y);
+  }
+  void initPath(GesturePoint point){
+    strokePath.moveTo(point.x, point.y);
+  }
+
 }

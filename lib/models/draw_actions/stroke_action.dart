@@ -8,6 +8,16 @@ import '../draw_actions.dart';
 // for example, if they put their finger down, wiggled it around, and let go.
 class StrokeAction extends DrawAction {
   final List<GesturePoint> points;
+  Path strokePath = Path();
 
   StrokeAction(this.points);
+
+  void addLine(GesturePoint point){
+  strokePath.lineTo(point.x, point.y);
 }
+  void initPath(GesturePoint point){
+    strokePath.moveTo(point.x, point.y);
+  }
+}
+
+

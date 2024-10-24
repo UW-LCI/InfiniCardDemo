@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
+import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/drawing.dart';
@@ -77,7 +78,13 @@ class InfinicardStateProvider extends ChangeNotifier{
       return;
     } else {
       final action = _pastActions.removeLast();
+      if(action is EraseAction){
+        for(DrawAction each in action.erased){
+          _pastActions.add(each);
+        }
+      }
       _futureActions.add(action);
+      
     }
     _invalidateAndNotify();
   }
@@ -85,6 +92,11 @@ class InfinicardStateProvider extends ChangeNotifier{
   redo(){
     if (_futureActions.isNotEmpty){
       final action = _futureActions.removeLast();
+      if(action is EraseAction){
+        for(DrawAction each in action.erased){
+          _pastActions.removeWhere((item) => item == each);
+        }
+      }
       _pastActions.add(action);
       _invalidateAndNotify();
     }
@@ -95,30 +107,46 @@ class InfinicardStateProvider extends ChangeNotifier{
     _invalidateAndNotify();
   }
 
-  erase(DrawAction eraseAction) {
+  erase(EraseAction eraseAction) {
     List<DrawAction> erasableActions = [];
     final futureIndexOfLastClearAction = _pastActions.lastIndexWhere((element) => element is ClearAction);
     if (futureIndexOfLastClearAction == -1){ // never been cleared
-      erasableActions = _pastActions;
+      erasableActions = List.from(_pastActions);
     } else {
-      final erasableActions = _pastActions.getRange(futureIndexOfLastClearAction, _pastActions.length).toList();
+      erasableActions = List.from(_pastActions.getRange(futureIndexOfLastClearAction, _pastActions.length).toList());
     }
-
     for (DrawAction action in erasableActions){
       switch(action){
         case ClearAction _:
-          debugPrint("clear");
           break;
         case NullAction _:
-          debugPrint("null");
           break;
-        case StrokeAction _:
-          debugPrint("stroke");
+        case EraseAction _:
           break;
-        case LineAction _:
-          debugPrint("line");
+        case StrokeAction strokeAction:
+          Path firstPath = eraseAction.strokePath;
+          Path secondPath = strokeAction.strokePath;
+
+          if(firstPath.getBounds().overlaps(secondPath.getBounds())){
+            eraseAction.erased.add(strokeAction);
+            _pastActions.removeWhere((item) => item == strokeAction);
+          } 
+          break;
+        case LineAction lineAction:
+          Path firstPath = eraseAction.strokePath;
+          Path secondPath = Path();
+          secondPath.moveTo(lineAction.point1.x, lineAction.point1.y);
+          secondPath.lineTo(lineAction.point2.x, lineAction.point2.y);
+
+          if(firstPath.getBounds().overlaps(secondPath.getBounds())){
+            eraseAction.erased.add(lineAction);
+            _pastActions.removeWhere((item) => item == lineAction);
+          } 
           break;
       }
+    }
+    if(eraseAction.erased.isNotEmpty){
+      _pastActions.add(eraseAction);
     }
 
   }

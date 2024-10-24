@@ -62,7 +62,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         infinicardProvider.pendingAction = NullAction();
         break;
       case Tools.stroke:
-        infinicardProvider.pendingAction = StrokeAction([_createPoint(event)]);
+        StrokeAction action = StrokeAction([_createPoint(event)]);
+        action.initPath(_createPoint(event));
+        infinicardProvider.pendingAction = action;
         break;
       case Tools.line:
         infinicardProvider.pendingAction = LineAction(
@@ -72,7 +74,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         );
         break;
       case Tools.erase:
-        infinicardProvider.pendingAction = EraseAction([_createPoint(event)]);
+        EraseAction action = EraseAction([_createPoint(event)]);
+        action.initPath(_createPoint(event));
+        infinicardProvider.pendingAction = action;
         break;
     }
   }
@@ -90,7 +94,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
       case Tools.stroke:
         final pendingAction = infinicardProvider.pendingAction as StrokeAction;
         pendingAction.points.add(_createPoint(event));
-        infinicardProvider.pendingAction = StrokeAction(pendingAction.points);
+        pendingAction.addLine(_createPoint(event));
+        infinicardProvider.pendingAction = pendingAction;
         break;
       case Tools.line:
         final pendingAction = infinicardProvider.pendingAction as LineAction;
@@ -101,7 +106,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
       case Tools.erase:
         final pendingAction = infinicardProvider.pendingAction as EraseAction;
         pendingAction.points.add(_createPoint(event));
-        infinicardProvider.pendingAction = EraseAction(pendingAction.points);
+        pendingAction.addLine(_createPoint(event));
+        infinicardProvider.pendingAction = pendingAction;
         break;
     }
   }
@@ -110,7 +116,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
       PointerUpEvent event, InfinicardStateProvider infinicardProvider) {
     infinicardProvider.add(infinicardProvider.pendingAction);
     if(infinicardProvider.toolSelected == Tools.erase){
-      infinicardProvider.erase(infinicardProvider.pendingAction);
+      infinicardProvider.erase(infinicardProvider.pendingAction as EraseAction);
     }
     infinicardProvider.pendingAction = NullAction();
   }

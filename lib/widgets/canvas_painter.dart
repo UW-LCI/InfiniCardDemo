@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/models/canvasTheme.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
@@ -71,7 +72,7 @@ class CanvasPainter extends CustomPainter {
           break;
         case EraseAction eraseAction:
           final paint = Paint()
-            ..color = ui.Color.fromARGB(255, 75, 255, 59)
+            ..color = CanvasTheme.backgroundColor
             ..strokeCap = StrokeCap.round
             ..strokeWidth = 5.0;
           paint.style = PaintingStyle.stroke;

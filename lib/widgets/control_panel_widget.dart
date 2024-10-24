@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/models/canvasTheme.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:provider/provider.dart';
 
