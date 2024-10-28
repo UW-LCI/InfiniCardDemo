@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
+import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
@@ -107,6 +108,27 @@ class InfinicardStateProvider extends ChangeNotifier{
     _invalidateAndNotify();
   }
 
+  int intersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4){
+    if((x1 == x2 && y1 == y2) || (x3==x4 && y3==y4)){
+      return 0;
+    }
+
+    double denominator = ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+
+    if(denominator == 0) {
+      return 0;
+    }
+
+    double ua = ((x4 - x3 ) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
+    double ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator;
+
+    if (ua < 0 || ua > 1 || ub < 0 || ub > 1){
+      return 0;
+    }
+
+    return 1;
+  }
+
   erase(EraseAction eraseAction) {
     List<DrawAction> erasableActions = [];
     final futureIndexOfLastClearAction = _pastActions.lastIndexWhere((element) => element is ClearAction);
@@ -124,21 +146,30 @@ class InfinicardStateProvider extends ChangeNotifier{
         case EraseAction _:
           break;
         case StrokeAction strokeAction:
-          Path firstPath = eraseAction.strokePath;
-          Path secondPath = strokeAction.strokePath;
+          int intersecting = 0;
 
-          if(firstPath.getBounds().overlaps(secondPath.getBounds())){
+          for (int i=0; i<eraseAction.points.length-1; i++){
+            List<GesturePoint> eraseSegment = [eraseAction.points[i], eraseAction.points[i+1]];
+            for(int j=0; j<strokeAction.points.length-1; j++){
+              List<GesturePoint> srokeSegment = [strokeAction.points[j], strokeAction.points[j+1]];
+              intersecting += intersect(eraseSegment[0].x, eraseSegment[0].y, eraseSegment[1].x, eraseSegment[1].y, 
+                srokeSegment[0].x, srokeSegment[0].y, srokeSegment[1].x, srokeSegment[1].y);
+            }
+          }
+          if(intersecting > 0){
             eraseAction.erased.add(strokeAction);
             _pastActions.removeWhere((item) => item == strokeAction);
           } 
           break;
         case LineAction lineAction:
-          Path firstPath = eraseAction.strokePath;
-          Path secondPath = Path();
-          secondPath.moveTo(lineAction.point1.x, lineAction.point1.y);
-          secondPath.lineTo(lineAction.point2.x, lineAction.point2.y);
-
-          if(firstPath.getBounds().overlaps(secondPath.getBounds())){
+          int intersecting = 0;
+          
+          for (int i=0; i<eraseAction.points.length-1; i++){
+            List<GesturePoint> eraseSegment = [eraseAction.points[i], eraseAction.points[i+1]];
+            intersecting += intersect(eraseSegment[0].x, eraseSegment[0].y, eraseSegment[1].x, eraseSegment[1].y, 
+                lineAction.point1.x, lineAction.point1.y, lineAction.point2.x, lineAction.point2.y);
+          }
+          if(intersecting>0){
             eraseAction.erased.add(lineAction);
             _pastActions.removeWhere((item) => item == lineAction);
           } 
@@ -150,6 +181,8 @@ class InfinicardStateProvider extends ChangeNotifier{
     }
 
   }
+
+
 
   //Render Methods
   void updateSource(String newSource){

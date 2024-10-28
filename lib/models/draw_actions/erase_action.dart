@@ -17,6 +17,7 @@ class EraseAction extends DrawAction {
 
   void addLine(GesturePoint point){
     strokePath.lineTo(point.x, point.y);
+    // strokePath.moveTo(point.x, point.y);
   }
   void initPath(GesturePoint point){
     strokePath.moveTo(point.x, point.y);
