@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
@@ -41,6 +42,7 @@ class InfinicardStateProvider extends ChangeNotifier {
     DropdownMenuEntry(value: 'icon', label: 'icon')
   ];
   DropdownMenu? dropdown;
+
   OverlayEntry entry = OverlayEntry(builder: (BuildContext context) {
     return Container(width: 0, height: 0, child: Text("HELLO"));
   });
@@ -49,9 +51,23 @@ class InfinicardStateProvider extends ChangeNotifier {
       : _pastActions = [],
         _futureActions = [];
 
-  DropdownMenu initDropdown(List<DropdownMenuEntry> elements) {
-    return DropdownMenu(dropdownMenuEntries: elements, menuStyle: MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)), inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: Colors.lightBlue[50]));
-    }
+  DropdownMenu initDropdown(List<DropdownMenuEntry> element, String? label) {
+    return DropdownMenu(
+        dropdownMenuEntries: element,
+        initialSelection: label,
+        menuStyle:
+            MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
+        inputDecorationTheme: InputDecorationTheme(
+            filled: true, fillColor: Colors.lightBlue[50]),
+        onSelected:(value) {
+          if(selectedAction is BoxAction){
+            BoxAction action = selectedAction as BoxAction;
+            action.elementName = value;
+          }
+          
+        },);
+        
+  }
 
   //Draw Methods
   Drawing get drawing {
@@ -242,7 +258,6 @@ class InfinicardStateProvider extends ChangeNotifier {
   }
 
   click(SelectBoxAction selectAction) {
-    dropdown ??= initDropdown(dropdownElements);
     List<DrawAction> clickableActions = [];
     List<BoxAction> possibleSelections = [];
     final futureIndexOfLastClearAction =
@@ -268,6 +283,7 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
     if (possibleSelections.length == 1) {
       selectedAction = possibleSelections[0];
+      dropdown = initDropdown(dropdownElements, possibleSelections[0].elementName);
       entry = OverlayEntry(
           builder: (context) => Positioned(
               top: selectAction.point.y,
@@ -284,8 +300,7 @@ class InfinicardStateProvider extends ChangeNotifier {
         }
       }
       selectedAction = current;
-      // entry = OverlayEntry(builder: (BuildContext context) {
-      //   return Text(current.rect.width.toString());}
+      dropdown = initDropdown(dropdownElements, current.elementName);
       entry = OverlayEntry(
           builder: (context) => Positioned(
               top: selectAction.point.y,
