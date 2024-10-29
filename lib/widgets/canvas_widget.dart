@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:infinicard_v1/functions/buildApp.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
+import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/null_action.dart';
+import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/multi_stroke_write.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
@@ -61,6 +63,10 @@ class CanvasWidgetState extends State<CanvasWidget> {
       case Tools.none:
         infinicardProvider.pendingAction = NullAction();
         break;
+      case Tools.select:
+        SelectBoxAction action = SelectBoxAction(_createPoint(event));
+        infinicardProvider.pendingAction = action;
+        break;
       case Tools.stroke:
         StrokeAction action = StrokeAction([_createPoint(event)]);
         action.initPath(_createPoint(event));
@@ -78,6 +84,13 @@ class CanvasWidgetState extends State<CanvasWidget> {
         action.initPath(_createPoint(event));
         infinicardProvider.pendingAction = action;
         break;
+      case Tools.box:
+        infinicardProvider.pendingAction = BoxAction(
+          _createPoint(event),
+          _createPoint(event,
+          )
+        );
+        break;
     }
   }
 
@@ -90,6 +103,10 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
     switch (infinicardProvider.toolSelected) {
       case Tools.none:
+        break;
+      case Tools.select:
+        SelectBoxAction action = SelectBoxAction(_createPoint(event));
+        infinicardProvider.pendingAction = action;
         break;
       case Tools.stroke:
         final pendingAction = infinicardProvider.pendingAction as StrokeAction;
@@ -109,15 +126,44 @@ class CanvasWidgetState extends State<CanvasWidget> {
         pendingAction.addLine(_createPoint(event));
         infinicardProvider.pendingAction = pendingAction;
         break;
+      case Tools.box:
+        final pendingAction = infinicardProvider.pendingAction as BoxAction;
+        infinicardProvider.pendingAction = BoxAction(
+          pendingAction.point1,
+          _createPoint(event)
+        );
+        break;
     }
   }
 
   void _handlePointerUp(
-      PointerUpEvent event, InfinicardStateProvider infinicardProvider) {
-    infinicardProvider.add(infinicardProvider.pendingAction);
-    if(infinicardProvider.toolSelected == Tools.erase){
-      infinicardProvider.erase(infinicardProvider.pendingAction as EraseAction);
+      PointerUpEvent event, InfinicardStateProvider infinicardProvider, BuildContext context) {
+    if(infinicardProvider.toolSelected == Tools.select){
+      OverlayEntry entry = infinicardProvider.entry;
+      if(entry.mounted){
+        entry.remove();
+      }
+      infinicardProvider.click(infinicardProvider.pendingAction as SelectBoxAction);
+      OverlayEntry newEntry = infinicardProvider.entry;
+      if(entry != newEntry){
+        Overlay.of(context).insert(newEntry);
+      }
     }
+    else if(infinicardProvider.toolSelected == Tools.box){
+        // BoxAction boxAction = infinicardProvider.pendingAction as BoxAction;
+        // Rect box = Rect.fromPoints(Offset(boxAction.point1.x, boxAction.point1.y),Offset(boxAction.point2.x, boxAction.point2.y));
+        // boxAction.rect = box;
+        // infinicardProvider.pendingAction = boxAction;
+        infinicardProvider.add(infinicardProvider.pendingAction);
+    }
+    else {
+      infinicardProvider.add(infinicardProvider.pendingAction);
+      if(infinicardProvider.toolSelected == Tools.erase){
+        infinicardProvider.erase(infinicardProvider.pendingAction as EraseAction);
+      }
+      
+    }
+    
     infinicardProvider.pendingAction = NullAction();
   }
 
@@ -233,7 +279,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
       return Listener(
         onPointerDown: (event) => _handlePointerDown(event, infinicardProvider),
         onPointerMove: (event) => _handlePointerMove(event, infinicardProvider),
-        onPointerUp: (event) => _handlePointerUp(event, infinicardProvider),
+        onPointerUp: (event) => _handlePointerUp(event, infinicardProvider, context),
         child: CustomPaint(
           foregroundPainter: CanvasPainter(infinicardProvider),
           child: Scaffold(body: Container(

@@ -50,6 +50,10 @@ class ControlPanelWidget extends StatelessWidget {
             child: const Text('Redo'),
           ),
           ElevatedButton(
+            onPressed: () => _cursor(context),
+            child: const Icon(Icons.ads_click),
+          ),
+          ElevatedButton(
             onPressed: () => _line(context),
             child: const Icon(Icons.edit),
           ),
@@ -60,6 +64,10 @@ class ControlPanelWidget extends StatelessWidget {
           ElevatedButton(
             onPressed: () => _erase(context),
             child: const Icon(Icons.auto_fix_normal),
+          ),
+          ElevatedButton(
+            onPressed: () => _box(context),
+            child: const Icon(Icons.rectangle_outlined),
           ),
           // ElevatedButton(
           //   onPressed: onDraw,
@@ -106,5 +114,15 @@ class ControlPanelWidget extends StatelessWidget {
   void _erase(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.erase;
+  }
+
+  void _box(BuildContext context){
+    final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
+    provider.toolSelected = Tools.box;
+  }
+
+  void _cursor(BuildContext context){
+    final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
+    provider.toolSelected = Tools.select;
   }
 }

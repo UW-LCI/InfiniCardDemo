@@ -13,7 +13,6 @@ class DrawingPage extends StatefulWidget {
 }
 
 class _DrawingPageState extends State<DrawingPage> {
-
   void _onRecognitionComplete(String xml) {
     if (xml.isNotEmpty) {
       Provider.of<InfinicardStateProvider>(context, listen: false)
@@ -74,54 +73,31 @@ class _DrawingPageState extends State<DrawingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Drawing Recognition')),
-      body: Column(
-        children: [
-          Expanded(
-            child: CanvasWidget(
-              key: widget.canvasKey,
-              onRecognitionComplete: _onRecognitionComplete,
+
+    return Consumer<InfinicardStateProvider>(
+        builder: (context, infinicardProvider, unchangingChild) {
+      
+      return Scaffold(
+        appBar: AppBar(title: const Text('Drawing Recognition')),
+        body: Column(
+          children: [
+            Expanded(
+              child: CanvasWidget(
+                key: widget.canvasKey,
+                onRecognitionComplete: _onRecognitionComplete,
+              ),
             ),
-          ),
-          ControlPanelWidget(
-            // onClear: () {
-            //   widget.canvasKey.currentState?.clearCanvas();
-            // },
-            onRecognize: () {
-              widget.canvasKey.currentState?.recognizeGesture();
-            },
-            // onSave: () async {
-            //   String? name = await _promptForGestureName(context);
-            //   if (name != null && name.trim().isNotEmpty) {
-            //     widget.canvasKey.currentState?.saveGesture(name.trim());
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       SnackBar(content: Text('Gesture "$name" saved successfully')),
-            //     );
-            //   } else {
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       const SnackBar(content: Text('Gesture name cannot be empty')),
-            //     );
-            //   }
-            // },
-            // onUndo: () {
-            //   widget.canvasKey.currentState?.undo();
-
-            // },
-            // onRedo: () {
-            //   widget.canvasKey.currentState?.redo();
-            // },
-
-            // onDraw: () {
-            //   _canvasKey.currentState?.draw();
-            // },
-            // onErase: () {
-            //   _canvasKey.currentState?.erase();
-
-            // }
-          ),
-        ],
-      ),
-    );
+            ControlPanelWidget(
+              // onClear: () {
+              //   widget.canvasKey.currentState?.clearCanvas();
+              // },
+              onRecognize: () {
+                widget.canvasKey.currentState?.recognizeGesture();
+              },
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

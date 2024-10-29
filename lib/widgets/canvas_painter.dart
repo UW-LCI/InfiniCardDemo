@@ -1,11 +1,14 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:infinicard_v1/models/canvasTheme.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
+import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
+import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/drawing.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
@@ -33,6 +36,7 @@ class CanvasPainter extends CustomPainter {
 
     final actionInProgress = _provider.pendingAction;
     _paintAction(canvas, actionInProgress, size);
+
   }
 
   void _paintAction(Canvas canvas, DrawAction action, Size size){
@@ -42,6 +46,8 @@ class CanvasPainter extends CustomPainter {
 
     switch (action) {
         case NullAction _:
+          break;
+        case SelectBoxAction _:
           break;
         case ClearAction _:
           canvas.drawRect(rect, clearPaint);
@@ -69,6 +75,20 @@ class CanvasPainter extends CustomPainter {
           ..strokeWidth = 2;
           canvas.drawLine(Offset(lineAction.point1.x, lineAction.point1.y), 
             Offset(lineAction.point2.x, lineAction.point2.y), paint);
+          break;
+        case BoxAction boxAction:
+          Color boxColor = Colors.blue;
+          if(boxAction == _provider.selectedAction){
+            boxColor = Colors.green;
+          }
+          final paint = Paint()
+          ..strokeWidth = 2
+          ..color = boxColor;
+          paint.style = PaintingStyle.stroke;
+          Rect box = Rect.fromPoints(Offset(boxAction.point1.x, boxAction.point1.y), Offset(boxAction.point2.x, boxAction.point2.y));
+          Path boxPath = Path();
+          boxPath.addRect(box);
+          canvas.drawPath(boxPath, paint);
           break;
         case EraseAction eraseAction:
           final paint = Paint()
