@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
+import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/objects/ICColor.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:xml/xml.dart';
@@ -304,4 +305,15 @@ Map getAction(XmlElement onPressedElement){
     }
   }
   return action;
+}
+
+bool contained(BoxAction parent, BoxAction child) {
+  if (parent.rect.contains(child.rect.topLeft) &&
+      parent.rect.contains(child.rect.topRight) &&
+      parent.rect.contains(child.rect.bottomLeft) &&
+      parent.rect.contains(child.rect.bottomRight)) {
+    return true;
+  } else {
+    return false;
+  }
 }

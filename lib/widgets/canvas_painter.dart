@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:infinicard_v1/functions/helpers.dart';
 import 'package:infinicard_v1/models/canvasTheme.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
@@ -12,6 +13,7 @@ import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/drawing.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
+import 'package:provider/provider.dart';
 
 class CanvasPainter extends CustomPainter {
   // final List<List<GesturePoint>> strokes;
@@ -85,7 +87,7 @@ class CanvasPainter extends CustomPainter {
           ..strokeWidth = 2
           ..color = boxColor;
           paint.style = PaintingStyle.stroke;
-          Rect box = Rect.fromPoints(Offset(boxAction.point1.x, boxAction.point1.y), Offset(boxAction.point2.x, boxAction.point2.y));
+          Rect box = action.rect;
           Path boxPath = Path();
           boxPath.addRect(box);
           canvas.drawPath(boxPath, paint);
@@ -117,4 +119,6 @@ class CanvasPainter extends CustomPainter {
   bool shouldRepaint(covariant CanvasPainter oldDelegate) {
     return oldDelegate._drawing != _drawing;
   }
+
+
 }

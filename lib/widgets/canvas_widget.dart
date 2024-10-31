@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
+import 'package:infinicard_v1/functions/helpers.dart';
+import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
@@ -132,10 +134,11 @@ class CanvasWidgetState extends State<CanvasWidget> {
         break;
       case Tools.box:
         final pendingAction = infinicardProvider.pendingAction as BoxAction;
-        infinicardProvider.pendingAction = BoxAction(
-          pendingAction.point1,
-          _createPoint(event)
-        );
+        BoxAction action = BoxAction(pendingAction.point1,_createPoint(event));
+        Rect box = Rect.fromPoints(Offset(action.point1.x, action.point1.y),Offset(action.point2.x, action.point2.y));
+        action.rect = box;
+        infinicardProvider.pendingAction = action;
+        
         break;
     }
   }
@@ -157,6 +160,13 @@ class CanvasWidgetState extends State<CanvasWidget> {
         BoxAction action = infinicardProvider.pendingAction as BoxAction;
         Rect box = Rect.fromPoints(Offset(action.point1.x, action.point1.y),Offset(action.point2.x, action.point2.y));
         action.rect = box;
+
+        List<Rect> containedElements = elementsWithin(action, infinicardProvider);
+        Rect newBox = combineRect(containedElements, action);
+        debugPrint(newBox.toString());
+
+        action.rect = newBox;
+
         infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
         OverlayEntry entry = infinicardProvider.entry;
         if(entry.mounted){
@@ -183,6 +193,33 @@ class CanvasWidgetState extends State<CanvasWidget> {
     }
     
     infinicardProvider.pendingAction = NullAction();
+  }
+    List<Rect> elementsWithin(BoxAction box, InfinicardStateProvider infinicardProvider){
+    List<Rect> elements = [];
+    for(DrawAction action in infinicardProvider.drawing.drawActions){
+      if(action is BoxAction){
+        if(contained(box, action)){
+          elements.add(action.rect);
+        }
+      }
+    }
+    return elements;
+  }
+
+  Rect combineRect(List<Rect> boxes, BoxAction action){
+    Rect box = action.rect;
+    if(boxes.length>1){
+      box = boxes[0];
+      for(int i=1; i<boxes.length; i++){
+        box = box.expandToInclude(boxes[i]).inflate(5.0);
+      }
+    } else if(boxes.length==1){
+      box = boxes[0].inflate(5.0);
+    } else {
+      box = action.rect;
+    }
+    action.rect = box;
+    return box;
   }
 
   Future<String> _recognizeGesture() async {
@@ -271,6 +308,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
       return "<root><ui></ui></root>";
     }
   }
+
+  
 
   // void clear() {
   //   setState(() {
