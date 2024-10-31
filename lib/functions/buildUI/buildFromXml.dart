@@ -1,6 +1,10 @@
+import "dart:math";
+
 import 'package:flutter/material.dart';
-import "package:infinicard_v1/functions/buildIcon.dart";
-import "package:infinicard_v1/functions/buildIconButton.dart";
+import "package:infinicard_v1/functions/buildUI/buildIcon.dart";
+import "package:infinicard_v1/functions/buildUI/buildIconButton.dart";
+import "package:infinicard_v1/objects/ICColumn.dart";
+import "package:infinicard_v1/objects/ICRow.dart";
 import 'package:xml/xml.dart';
 
 import "buildAppBar.dart";
@@ -15,9 +19,9 @@ import "package:infinicard_v1/objects/ICText.dart";
 
 Widget buildXML(List<ICObject> uiElements, BuildContext context){
 
-  var uiWidgets = uiElements.map((element) => element.toFlutter(context)).toList();
+  var uiWidgets = uiElements.map((element) => buildUIElement(element, context)).toList();
 
-  return Column(crossAxisAlignment: CrossAxisAlignment.start, children:uiWidgets);
+  return Stack(children:uiWidgets);
 }
 
 List<ICObject> getXML(String xml, BuildContext context){
@@ -40,9 +44,22 @@ List<ICObject> getUIElements(Iterable<XmlElement> elements, BuildContext context
   return uiElements;
 }
 
-Widget buildUIElement(XmlElement child, BuildContext context){
-  var uiElement = getUIElement(child, context);
-  return SizedBox(child:uiElement.toFlutter(context)); //TO DO: enforce size constraints
+Widget buildUIElement(ICObject element, BuildContext context){
+  var height = element.height;
+  var width = element.width;
+
+  var top = element.top;
+  var left = element.left;
+
+  // if(element is ICText){
+  //   return Positioned(top: top, left: left, height: height, width: width, child:FittedBox(child:element.toFlutter(context)));
+  // } else if(element is ICRow || element is ICColumn){
+  //   return Positioned(top: top, left: left, height: height, width: width, child:element.toFlutter(context));
+  // } else {
+  //   return Positioned(top: top, left: left, height: height, width: width, child: element.toFlutter(context));
+  // }
+  return Positioned(top: top, left: left, height: height, width: width, child: element.toFlutter(context));
+  
 }
 
 ICObject getUIElement(XmlElement child, BuildContext context){

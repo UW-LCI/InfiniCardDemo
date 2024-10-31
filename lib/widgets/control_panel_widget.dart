@@ -29,25 +29,25 @@ class ControlPanelWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
+      padding: const EdgeInsets.all(5.0),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           ElevatedButton(
             onPressed: () => _clear(context),
-            child: const Text('Clear'),
+            child: const Icon(Icons.delete),
           ),
           ElevatedButton(
             onPressed: onRecognize,
-            child: const Text('Recognize'),
+            child: const Icon(Icons.lightbulb),
           ),
           ElevatedButton(
             onPressed: () => _undo(context),
-            child: const Text('Undo'),
+            child: const Icon(Icons.undo),
           ),
           ElevatedButton(
             onPressed: () => _redo(context),
-            child: const Text('Redo'),
+            child: const Icon(Icons.redo),
           ),
           ElevatedButton(
             onPressed: () => _cursor(context),

@@ -6,9 +6,17 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 class ICColumn extends ICObject{
   List<ICObject> children;
 
-  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
+  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.spaceBetween;
   MainAxisSize mainAxisSize = MainAxisSize.max;
   CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center;
+
+  int id = -1;
+
+  double? height = 10;
+  double? width = 10;
+  
+  double? top = 10;
+  double? left = 10;
 
   ICColumn(this.children);
 
@@ -24,6 +32,16 @@ class ICColumn extends ICObject{
     crossAxisAlignment = alignment;
   }
 
+  void setSize({double? heightArg, double? widthArg}){
+    height = heightArg;
+    width = widthArg;
+  }
+
+  void setLocation({double? topArg, double? leftArg}){
+    top = topArg;
+    left = leftArg;
+  }
+
   @override
   Widget toFlutter(BuildContext context) {
     var flutterChildren = children.map((child) => child.toFlutter(context)).toList();
@@ -36,21 +54,37 @@ class ICColumn extends ICObject{
 
   @override
   XmlElement toXml({bool verbose=false}){
-    final columnElement = XmlElement(XmlName("column"));
-    final properties = XmlElement(XmlName("properties"));
+    final element = XmlElement(XmlName('column'),[XmlAttribute(XmlName("id"), id.toString())],[]);
+    final propertiesElement = XmlElement(XmlName("properties"));
 
-    properties.children.add(XmlElement(XmlName("mainAxisAlignment"),[],[XmlText(mainAxisAlignment.toString())]));
-    properties.children.add(XmlElement(XmlName("crossAxisAlignment"),[],[XmlText(crossAxisAlignment.toString())]));
-    properties.children.add(XmlElement(XmlName("mainAxisSize"),[],[XmlText(mainAxisSize.toString())]));
+    propertiesElement.children.add(XmlElement(XmlName("mainAxisAlignment"),[],[XmlText(mainAxisAlignment.toString())]));
+    propertiesElement.children.add(XmlElement(XmlName("crossAxisAlignment"),[],[XmlText(crossAxisAlignment.toString())]));
+    propertiesElement.children.add(XmlElement(XmlName("mainAxisSize"),[],[XmlText(mainAxisSize.toString())]));
 
-    columnElement.children.add(properties);
+    final sizeElement = XmlElement(XmlName("size"));
+    final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
+    final widthElement = (width!= null) ? XmlElement(XmlName("width"), [], [XmlText(width.toString())]) : XmlElement(XmlName("width"), [], [XmlText("")]);
+
+    final locationElement = XmlElement(XmlName("location"));
+    final topElement = (height!= null) ? XmlElement(XmlName("top"), [], [XmlText(top.toString())]) : XmlElement(XmlName("top"), [], [XmlText("")]);
+    final leftElement = (width!= null) ? XmlElement(XmlName("left"), [], [XmlText(left.toString())]) : XmlElement(XmlName("left"), [], [XmlText("")]);
+
+    sizeElement.children.add(heightElement);
+    sizeElement.children.add(widthElement);
+    propertiesElement.children.add(sizeElement);
+
+    locationElement.children.add(topElement);
+    locationElement.children.add(leftElement);
+    propertiesElement.children.add(locationElement);
+
+    element.children.add(propertiesElement);
 
     final childElements = XmlElement(XmlName("children"), [], [XmlText("")]);
 
     var xmlChildren = children.map((child) => child.toXml(verbose: verbose)).toList();
     childElements.children.addAll(xmlChildren);
 
-    columnElement.children.add(childElements);
-    return columnElement;
+    element.children.add(childElements);
+    return element;
   }
 }

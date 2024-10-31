@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/objects/ICTextButton.dart';
-import 'package:infinicard_v1/functions/buildButtonStyle.dart';
-import 'package:infinicard_v1/functions/buildText.dart';
+import 'package:infinicard_v1/functions/buildUI/buildButtonStyle.dart';
+import 'package:infinicard_v1/functions/buildUI/buildText.dart';
 
 import 'package:xml/xml.dart';
 
-import 'helpers.dart';
+import '../helpers.dart';
 
 ICTextButton getTextButton(XmlElement button, BuildContext context){
   var properties = button.getElement("properties");
@@ -27,6 +27,9 @@ ICTextButton getTextButton(XmlElement button, BuildContext context){
       case "size":
         var size = getSize(property);
         textButton.setSize(heightArg:size[0], widthArg:size[1]);
+      case "location":
+        var location = getLocation(property);
+        textButton.setLocation(topArg: location[0], leftArg: location[1]);
       case "buttonStyle":
         textButton.setStyle(getButtonStyle(property));
         break;
@@ -38,14 +41,6 @@ ICTextButton getTextButton(XmlElement button, BuildContext context){
 
   return textButton;
   
-}
-
-Widget buildTextButton(XmlElement button, BuildContext context){
-  var textButton = getTextButton(button, context);
-  var height = textButton.height;
-  var width = textButton.width;
-
-  return SizedBox(height: height, width: width, child: textButton.toFlutter(context));
 }
 
 

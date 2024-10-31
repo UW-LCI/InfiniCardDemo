@@ -10,6 +10,14 @@ class ICIcon extends ICObject{
   ICColor? iconColor;
   double? iconSize;
 
+  double? height;
+  double? width;
+  
+  double? top;
+  double? left;
+
+  int id = -1;
+
   ICIcon();
 
   void setIcon(String name){
@@ -21,8 +29,18 @@ class ICIcon extends ICObject{
     iconColor = color;
   }
 
-  void setSize(double? size){
+  void setIconSize(double? size){
     iconSize = size;
+  }
+
+  void setSize({double? heightArg, double? widthArg}){
+    height = heightArg;
+    width = widthArg;
+  }
+
+  void setLocation({double? topArg, double? leftArg}){
+    top = topArg;
+    left = leftArg;
   }
 
   @override
@@ -32,22 +50,48 @@ class ICIcon extends ICObject{
 
   @override
   XmlElement toXml({verbose=false}){
-    final element = XmlElement(XmlName("icon"),[],[XmlText("")]);
+    final element = XmlElement(XmlName('icon'),[XmlAttribute(XmlName("id"), id.toString())],[]);
     final propertiesElement = XmlElement(XmlName("properties"), [], [XmlText("")]);
 
     final iconElement = icon != null ? XmlElement(XmlName("iconName"),[],[XmlText(iconName)]) : XmlElement(XmlName("iconName"),[],[XmlText("")]);
     final colorElement = iconColor != null ? XmlElement(XmlName("color"),[],[XmlText(iconColor!.toColorString())]) : XmlElement(XmlName("color"),[],[XmlText("")]);
-    final sizeElement = iconSize != null ? XmlElement(XmlName("size"),[],[XmlText(iconSize.toString())]) : XmlElement(XmlName("size"),[],[XmlText("")]);
+    final iconSizeElement = iconSize != null ? XmlElement(XmlName("iconSize"),[],[XmlText(iconSize.toString())]) : XmlElement(XmlName("iconSize"),[],[XmlText("")]);
     
+    final sizeElement = XmlElement(XmlName("size"));
+    final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
+    final widthElement = (width!= null) ? XmlElement(XmlName("width"), [], [XmlText(width.toString())]) : XmlElement(XmlName("width"), [], [XmlText("")]);
+
+    final locationElement = XmlElement(XmlName("location"));
+    final topElement = (height!= null) ? XmlElement(XmlName("top"), [], [XmlText(top.toString())]) : XmlElement(XmlName("top"), [], [XmlText("")]);
+    final leftElement = (width!= null) ? XmlElement(XmlName("left"), [], [XmlText(left.toString())]) : XmlElement(XmlName("left"), [], [XmlText("")]);
+
     if(verbose==false){
       if(icon!=null){propertiesElement.children.add(iconElement);}
       if(iconColor!=null){propertiesElement.children.add(colorElement);}
-      if(iconSize!=null){propertiesElement.children.add(sizeElement);}
+      if(iconSize!=null){propertiesElement.children.add(iconSizeElement);}
+
+      if(height != null){sizeElement.children.add(heightElement);}
+      if(width != null){sizeElement.children.add(widthElement);}
+      if(sizeElement.children.isNotEmpty){propertiesElement.children.add(sizeElement);}
+
+      if(top != null){locationElement.children.add(topElement);}
+      if(left != null){locationElement.children.add(leftElement);}
+      if(locationElement.children.isNotEmpty){propertiesElement.children.add(locationElement);}
+
       if(propertiesElement.children.isNotEmpty){element.children.add(propertiesElement);}
     } else {
       propertiesElement.children.add(iconElement);
       propertiesElement.children.add(colorElement);
+      propertiesElement.children.add(iconSizeElement);
+
+      sizeElement.children.add(heightElement);
+      sizeElement.children.add(widthElement);
       propertiesElement.children.add(sizeElement);
+
+      locationElement.children.add(topElement);
+      locationElement.children.add(leftElement);
+      propertiesElement.children.add(locationElement);
+
       element.children.add(propertiesElement);
     }
 

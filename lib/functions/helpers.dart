@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:infinicard_v1/functions/buildFromXml.dart';
+import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
 import 'package:infinicard_v1/objects/ICColor.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:xml/xml.dart';
@@ -92,7 +92,7 @@ bool? getCenter(XmlElement centerElement){
   bool? center;
   try{
     center = bool.parse(centerVal.toLowerCase().replaceAll(' ', ''));
-  } on Exception {
+  } on Exception catch(_) {
     debugPrint("Failed to interpret bool value $centerVal");
     center=null;
   }
@@ -105,7 +105,7 @@ double? getHeight(XmlElement heightElement){
   double? height;
   try{
     height = double.parse(heightVal.toLowerCase().replaceAll(' ', ''));
-  } on Exception {
+  } on Exception catch(_) {
     debugPrint("Failed to interpret double value $heightVal");
     height = null;
   }
@@ -117,7 +117,7 @@ double? getDouble(XmlElement numElement){
   double? number;
   try{
     number = double.parse(val.toLowerCase().replaceAll(' ', ''));
-  } on Exception {
+  } on Exception catch(_) {
     debugPrint("Failed to interpret double value $val");
     number = null;
   }
@@ -129,7 +129,7 @@ double? getWidth(XmlElement widthElement){
   double? width;
   try{
     width = double.parse(widthVal.toLowerCase().replaceAll(' ', ''));
-  } on Exception {
+  } on Exception catch(_) {
     debugPrint("Failed to interpret double value $widthVal");
     width = null;
   }
@@ -146,14 +146,29 @@ List<double?> getSize(XmlElement sizeElement){
   return [height, width];
 }
 
+List<double?> getLocation(XmlElement locationElement){
+  var topElement = locationElement.getElement("top");
+  var top = topElement != null ? getDouble(topElement) : null;
+  
+  var leftElement = locationElement.getElement("left");
+  var left = leftElement != null ? getDouble(leftElement) : null;
+  
+  return [top, left];
+}
+
 String getString(XmlElement? string){
   var value = string != null ? string.innerText.toString() : "";
   return value;
 }
 
 String getImgPath(XmlElement? path){
-  var value = path != null ? path.innerText.toString() : "error.png";
-  return value;
+  List<String> validImagePaths = ['error.png', 'pendingImage.png', 'upload.png'];
+  String value = path != null ? path.innerText.toString() : "";
+  if(validImagePaths.contains(value)){
+    return value;
+  } else {
+    return "error.png";
+  }
 }
 
 TextAlign getTextAlign(XmlElement textAlign){

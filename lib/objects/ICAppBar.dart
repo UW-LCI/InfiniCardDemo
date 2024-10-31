@@ -8,13 +8,21 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 
 class ICAppBar extends ICObject{
   ICObject? leading;
-  ICText? title;
+  ICObject? title;
   List<ICObject>? actions;
   double? toolbarHeight;
+
   double? height;
+  double? width;
+  
+  double? top;
+  double? left;
+
   ICColor? backgroundColor;
   bool? centerTitle;
   double? leadingWidth;
+
+  int id = -1;
 
   ICAppBar();
 
@@ -22,7 +30,7 @@ class ICAppBar extends ICObject{
     leading = leadingArg;
   }
 
-  void setTitle(ICText titleArg, {TextStyle? style}) {
+  void setTitle(ICObject titleArg, {TextStyle? style}) {
     title = titleArg;
   }
 
@@ -34,8 +42,14 @@ class ICAppBar extends ICObject{
     toolbarHeight = heightArg;
   }
 
-  void setHeight(double? heightArg) {
+  void setSize({double? heightArg, double? widthArg}){
     height = heightArg;
+    width = widthArg;
+  }
+
+  void setLocation({double? topArg, double? leftArg}){
+    top = topArg;
+    left = leftArg;
   }
 
   void setBackgroundColor(ICColor colorArg) {
@@ -65,12 +79,20 @@ class ICAppBar extends ICObject{
 
   @override
   XmlElement toXml({bool verbose=false}){
-    final element = XmlElement(XmlName('bar'));
+    final element = XmlElement(XmlName('bar'),[XmlAttribute(XmlName("id"), id.toString())],[]);
+
     final propertiesElement = XmlElement(XmlName('properties'));
 
     final bgElement = backgroundColor != null ? XmlElement(XmlName("backgroundColor"),[],[XmlText(backgroundColor!.toColorString())]) : XmlElement(XmlName("backgroundColor"), [], [XmlText("")]);
 
-    final heightElement = height != null ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
+    final sizeElement = XmlElement(XmlName("size"));
+    final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
+    final widthElement = (width!= null) ? XmlElement(XmlName("width"), [], [XmlText(width.toString())]) : XmlElement(XmlName("width"), [], [XmlText("")]);
+
+    final locationElement = XmlElement(XmlName("location"));
+    final topElement = (height!= null) ? XmlElement(XmlName("top"), [], [XmlText(top.toString())]) : XmlElement(XmlName("top"), [], [XmlText("")]);
+    final leftElement = (width!= null) ? XmlElement(XmlName("left"), [], [XmlText(left.toString())]) : XmlElement(XmlName("left"), [], [XmlText("")]);
+
     final toolHeightElement = toolbarHeight != null ? XmlElement(XmlName("toolbarHeight"), [], [XmlText(toolbarHeight.toString())]) : XmlElement(XmlName("toolbarHeight"), [], [XmlText("")]);
     final centerElement = centerTitle != null ? XmlElement(XmlName("centerTitle"), [], [XmlText(centerTitle.toString())]) : XmlElement(XmlName("centerTitle"), [], [XmlText("")]);
 
@@ -83,7 +105,15 @@ class ICAppBar extends ICObject{
 
     if(verbose==false){
       if(backgroundColor != null){propertiesElement.children.add(bgElement);}
-      if(height != null){propertiesElement.children.add(heightElement);}
+
+      if(height != null){sizeElement.children.add(heightElement);}
+      if(width != null){sizeElement.children.add(widthElement);}
+      if(sizeElement.children.isNotEmpty){propertiesElement.children.add(sizeElement);}
+
+      if(top != null){locationElement.children.add(topElement);}
+      if(left != null){locationElement.children.add(leftElement);}
+      if(locationElement.children.isNotEmpty){propertiesElement.children.add(locationElement);}
+
       if(toolbarHeight != null){propertiesElement.children.add(toolHeightElement);}
       if(centerTitle != null){propertiesElement.children.add(centerElement);}
       if(title != null){propertiesElement.children.add(titleElement);}
@@ -91,7 +121,15 @@ class ICAppBar extends ICObject{
       if(propertiesElement.children.isNotEmpty){element.children.add(propertiesElement);}
     } else {
       propertiesElement.children.add(bgElement);
-      propertiesElement.children.add(heightElement);
+
+      sizeElement.children.add(heightElement);
+      sizeElement.children.add(widthElement);
+      propertiesElement.children.add(sizeElement);
+
+      locationElement.children.add(topElement);
+      locationElement.children.add(leftElement);
+      propertiesElement.children.add(locationElement);
+
       propertiesElement.children.add(toolHeightElement);
       propertiesElement.children.add(centerElement);
       propertiesElement.children.add(titleElement);

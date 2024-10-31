@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:infinicard_v1/functions/buildText.dart';
+import 'package:infinicard_v1/functions/buildUI/buildText.dart';
 import 'package:infinicard_v1/objects/ICColor.dart';
 import 'package:xml/xml.dart';
 
 import 'package:infinicard_v1/objects/ICAppBar.dart';
-import 'package:infinicard_v1/functions/buildFromXml.dart';
-import 'helpers.dart';
+import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
+import '../helpers.dart';
 
 ICAppBar getBar(XmlElement bar, BuildContext context){
   var properties = bar.getElement("properties");
@@ -23,9 +23,9 @@ ICAppBar getBar(XmlElement bar, BuildContext context){
       case "toolbarHeight":
         appBar.setToolbarHeight(getHeight(property));
         break;
-      case "height":
-        appBar.setHeight(getHeight(property));
-        break;
+      case "size":
+        var size = getSize(property);
+        appBar.setSize(heightArg:size[0], widthArg:size[1]);
       case "text":
         appBar.setTitle(getText(property, context));
         break;
@@ -40,19 +40,13 @@ ICAppBar getBar(XmlElement bar, BuildContext context){
       case "actions":
         appBar.setActions(getActions(property, context));
         break;
+      case "location":
+        var location = getLocation(property);
+        appBar.setLocation(topArg: location[0], leftArg: location[1]);
       default:
         debugPrint("Tried to build unrecognized property: $type");
     }
     
   }
   return appBar;
-}
-
-
-
-Widget buildBar(XmlElement appBarElement, BuildContext context){
-  var bar = getBar(appBarElement, context);
-  var height = bar.toolbarHeight;
-
-  return SizedBox(height:height, child:bar.toFlutter(context));
 }

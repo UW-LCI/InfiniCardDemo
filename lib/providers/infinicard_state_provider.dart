@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:infinicard_v1/functions/buildApp.dart';
+import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
+import 'package:infinicard_v1/functions/compileXML/compileDrawing.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
@@ -44,7 +45,7 @@ class InfinicardStateProvider extends ChangeNotifier {
   DropdownMenu? dropdown;
 
   OverlayEntry entry = OverlayEntry(builder: (BuildContext context) {
-    return Container(width: 0, height: 0, child: Text("HELLO"));
+    return Container(width: 1, height: 0, child: Text("HELLO"));
   });
 
   InfinicardStateProvider({required this.width, required this.height})
@@ -63,7 +64,13 @@ class InfinicardStateProvider extends ChangeNotifier {
           if(selectedAction is BoxAction){
             BoxAction action = selectedAction as BoxAction;
             action.elementName = value;
+            updateSource(compileDrawing(getActiveActions()));
+          } else if(_pastActions.last is BoxAction){
+            BoxAction action = _pastActions.last as BoxAction;
+            action.elementName = value;
+            updateSource(compileDrawing(getActiveActions()));
           }
+          _clearOverlay();
           
         },);
         
@@ -98,6 +105,19 @@ class InfinicardStateProvider extends ChangeNotifier {
 
   Tools get toolSelected => _toolSelected;
 
+  List<DrawAction> getActiveActions(){
+    final futureIndexOfLastClearAction =
+        _pastActions.lastIndexWhere((element) => element is ClearAction);
+    if (futureIndexOfLastClearAction == -1) {
+      return _pastActions;
+    } else {
+      final actions = _pastActions
+          .getRange(futureIndexOfLastClearAction, _pastActions.length)
+          .toList();
+     return actions;
+    }
+  }
+
   _createCachedDrawing() {
     final futureIndexOfLastClearAction =
         _pastActions.lastIndexWhere((element) => element is ClearAction);
@@ -112,6 +132,13 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
   }
 
+  _clearOverlay(){
+    if(entry.mounted){
+      entry.remove();
+    }
+  }
+  
+
   _invalidateAndNotify() {
     _drawing = null;
     notifyListeners();
@@ -124,6 +151,7 @@ class InfinicardStateProvider extends ChangeNotifier {
   }
 
   undo() {
+    _clearOverlay();
     if (_pastActions.isEmpty) {
       return;
     } else {
@@ -135,10 +163,12 @@ class InfinicardStateProvider extends ChangeNotifier {
       }
       _futureActions.add(action);
     }
+    updateSource(compileDrawing(getActiveActions()));
     _invalidateAndNotify();
   }
 
   redo() {
+    _clearOverlay();
     if (_futureActions.isNotEmpty) {
       final action = _futureActions.removeLast();
       if (action is EraseAction) {
@@ -147,12 +177,15 @@ class InfinicardStateProvider extends ChangeNotifier {
         }
       }
       _pastActions.add(action);
+      updateSource(compileDrawing(getActiveActions()));
       _invalidateAndNotify();
     }
   }
 
   clear() {
     add(ClearAction());
+    _clearOverlay();
+    updateSource(compileDrawing(getActiveActions()));
     _invalidateAndNotify();
   }
 
@@ -179,6 +212,7 @@ class InfinicardStateProvider extends ChangeNotifier {
   }
 
   erase(EraseAction eraseAction) {
+    _clearOverlay();
     List<DrawAction> erasableActions = [];
     final futureIndexOfLastClearAction =
         _pastActions.lastIndexWhere((element) => element is ClearAction);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:infinicard_v1/functions/buildApp.dart';
+import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
@@ -90,6 +90,10 @@ class CanvasWidgetState extends State<CanvasWidget> {
           _createPoint(event,
           )
         );
+        OverlayEntry entry = infinicardProvider.entry;
+        if(entry.mounted){
+          entry.remove();
+        }
         break;
     }
   }
@@ -150,11 +154,25 @@ class CanvasWidgetState extends State<CanvasWidget> {
       }
     }
     else if(infinicardProvider.toolSelected == Tools.box){
-        // BoxAction boxAction = infinicardProvider.pendingAction as BoxAction;
-        // Rect box = Rect.fromPoints(Offset(boxAction.point1.x, boxAction.point1.y),Offset(boxAction.point2.x, boxAction.point2.y));
-        // boxAction.rect = box;
-        // infinicardProvider.pendingAction = boxAction;
+        BoxAction action = infinicardProvider.pendingAction as BoxAction;
+        Rect box = Rect.fromPoints(Offset(action.point1.x, action.point1.y),Offset(action.point2.x, action.point2.y));
+        action.rect = box;
+        infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
+        OverlayEntry entry = infinicardProvider.entry;
+        if(entry.mounted){
+          entry.remove();
+        }
+        infinicardProvider.entry = OverlayEntry(
+          builder: (context) => Positioned(
+              top: action.point2.y,
+              left: action.point2.x,
+              child: Container(width: 200, height: 100, child: infinicardProvider.dropdown)));
+        OverlayEntry newEntry = infinicardProvider.entry;
+        if(entry != newEntry){
+          Overlay.of(context).insert(newEntry);
+        }
         infinicardProvider.add(infinicardProvider.pendingAction);
+        
     }
     else {
       infinicardProvider.add(infinicardProvider.pendingAction);

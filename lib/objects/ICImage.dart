@@ -5,18 +5,30 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 
 class ICImage extends ICObject{
   String path;
+
   double? width = 50;
   double? height = 50;
+
+  double? top;
+  double? left;
+
   String semanticLabel = "";
   BoxShape shape = BoxShape.rectangle;
   BorderRadiusGeometry? border;
   String? shapeDescription;
+
+  int id = -1;
 
   ICImage(this.path);
 
   void setSize({double? widthArg, double? heightArg}){
     height = heightArg;
     width = widthArg;
+  }
+
+  void setLocation({double? topArg, double? leftArg}){
+    top = topArg;
+    left = leftArg;
   }
 
   void setAltText(String text) {
@@ -80,33 +92,48 @@ class ICImage extends ICObject{
 
   @override
   XmlElement toXml({bool verbose=false}){
-    final imgElement = XmlElement(XmlName("image"));
+    final element = XmlElement(XmlName('image'),[XmlAttribute(XmlName("id"), id.toString())],[]);
     final pathElement = XmlElement(XmlName("path"), [], [XmlText(path)]);
-    imgElement.children.add(pathElement);
+    element.children.add(pathElement);
 
     final propertiesElement = XmlElement(XmlName("properties"));
+
     final sizeElement = XmlElement(XmlName("size"));
     final shapeElement = shapeDescription != null ? XmlElement(XmlName("shape"),[],[XmlText(shapeDescription as String)]) : XmlElement(XmlName("shape"),[],[XmlText("")]);
     final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
     final widthElement = (width!= null) ? XmlElement(XmlName("width"), [], [XmlText(width.toString())]) : XmlElement(XmlName("width"), [], [XmlText("")]);
     final labelElement = (semanticLabel != "") ? XmlElement(XmlName("altText"), [], [XmlText(semanticLabel)]) : XmlElement(XmlName("altText"), [], [XmlText("")]);
 
+    final locationElement = XmlElement(XmlName("location"));
+    final topElement = (height!= null) ? XmlElement(XmlName("top"), [], [XmlText(top.toString())]) : XmlElement(XmlName("top"), [], [XmlText("")]);
+    final leftElement = (width!= null) ? XmlElement(XmlName("left"), [], [XmlText(left.toString())]) : XmlElement(XmlName("left"), [], [XmlText("")]);
+
     if(verbose==false){
       if(height != null){sizeElement.children.add(heightElement);}
       if(width != null){sizeElement.children.add(widthElement);}
       if(sizeElement.children.isNotEmpty){propertiesElement.children.add(sizeElement);}
+
+      if(top != null){locationElement.children.add(topElement);}
+      if(left != null){locationElement.children.add(leftElement);}
+      if(locationElement.children.isNotEmpty){propertiesElement.children.add(locationElement);}
+
       if(shapeDescription != null){propertiesElement.children.add(shapeElement);}
       if(semanticLabel != ""){propertiesElement.children.add(labelElement);}
-      if(propertiesElement.children.isNotEmpty){imgElement.children.add(propertiesElement);}
+      if(propertiesElement.children.isNotEmpty){element.children.add(propertiesElement);}
     } else {
       sizeElement.children.add(heightElement);
       sizeElement.children.add(widthElement);
       propertiesElement.children.add(sizeElement);
+
+      locationElement.children.add(topElement);
+      locationElement.children.add(leftElement);
+      propertiesElement.children.add(locationElement);
+
       propertiesElement.children.add(shapeElement);
       propertiesElement.children.add(labelElement);
-      imgElement.children.add(propertiesElement);
+      element.children.add(propertiesElement);
     }
 
-    return imgElement;
+    return element;
   }
 }

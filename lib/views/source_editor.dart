@@ -27,6 +27,7 @@ class _SourceEditorState extends State<SourceEditor> {
   void initState() {
     super.initState();
     currentSourceString = _getInfinicardStateProvider(context).source;
+    _textController.text = currentSourceString;
     initHive().then((value) {
       uiDB = value;
       loadItems(uiDB);
@@ -40,11 +41,21 @@ class _SourceEditorState extends State<SourceEditor> {
     return await Hive.openBox("UI");
   }
 
-  void _compileFromDrawing(String xml) {
+  void compileFromDrawing() {
+    String xml = _getSource(context, true);
     if (xml.isNotEmpty) {
       _textController.text = xml;
       _compileSource(context, xml);
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    _textController.text = Provider.of<InfinicardStateProvider>(
+      context,
+      listen: true, // Be sure to listen
+    ).source;
+    super.didChangeDependencies();
   }
 
   @override
@@ -59,8 +70,7 @@ class _SourceEditorState extends State<SourceEditor> {
                 onPressed: () async {
                   if (widget.canvasKey.currentState != null) {
                     // String xml = await widget.canvasKey.currentState!.recognize();
-                    String xml = "<root></root>";
-                    _compileFromDrawing(xml);
+                    compileFromDrawing();
                   }
                   else {
                     debugPrint("Canvas key is null");

@@ -3,8 +3,8 @@ import 'package:xml/xml.dart';
 
 import 'package:infinicard_v1/objects/ICColumn.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
-import 'package:infinicard_v1/functions/buildFromXml.dart';
-import 'helpers.dart';
+import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
+import '../helpers.dart';
 
 ICColumn getColumn(XmlElement child, BuildContext context){
   List<ICObject> children = [];
@@ -29,6 +29,14 @@ ICColumn getColumn(XmlElement child, BuildContext context){
         break;
       case "crossAxisAlignment":
         column.setCrossAxisAlignment(getCrossAxisAlignment(property));
+        break;
+      case "size":
+        var size = getSize(property);
+        column.setSize(heightArg:size[0], widthArg:size[1]);
+        break;
+      case "location":
+        var location = getLocation(property);
+        column.setLocation(topArg: location[0], leftArg: location[1]);
         break;
       default:
     }

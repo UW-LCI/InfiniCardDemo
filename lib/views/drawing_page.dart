@@ -79,14 +79,8 @@ class _DrawingPageState extends State<DrawingPage> {
       
       return Scaffold(
         appBar: AppBar(title: const Text('Drawing Recognition')),
-        body: Column(
+        body: Row(
           children: [
-            Expanded(
-              child: CanvasWidget(
-                key: widget.canvasKey,
-                onRecognitionComplete: _onRecognitionComplete,
-              ),
-            ),
             ControlPanelWidget(
               // onClear: () {
               //   widget.canvasKey.currentState?.clearCanvas();
@@ -94,6 +88,12 @@ class _DrawingPageState extends State<DrawingPage> {
               onRecognize: () {
                 widget.canvasKey.currentState?.recognizeGesture();
               },
+            ),
+            Expanded(
+              child: CanvasWidget(
+                key: widget.canvasKey,
+                onRecognitionComplete: _onRecognitionComplete,
+              ),
             ),
           ],
         ),

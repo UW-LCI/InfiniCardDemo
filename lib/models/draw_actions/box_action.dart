@@ -8,9 +8,13 @@ class BoxAction extends DrawAction {
   final GesturePoint point1;
   final GesturePoint point2;
 
+  int uniqueID = UniqueKey().hashCode;
+  bool active = true;
+
   String elementName = "";
 
   Rect rect = Rect.fromPoints(Offset.zero, Offset.zero);
 
   BoxAction(this.point1, this.point2);
+
 }

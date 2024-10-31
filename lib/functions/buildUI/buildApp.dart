@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:infinicard_v1/functions/buildFromXml.dart';
-import 'package:infinicard_v1/functions/buildTheme.dart';
+import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
+import 'package:infinicard_v1/functions/buildUI/buildTheme.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
 import 'package:infinicard_v1/objects/ICThemeData.dart';
 import 'package:xml/xml.dart';

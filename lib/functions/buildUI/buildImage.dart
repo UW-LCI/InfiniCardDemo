@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:xml/xml.dart';
 
 import 'package:infinicard_v1/objects/ICImage.dart';
-import 'helpers.dart';
+import '../helpers.dart';
 
 ICImage getImage(XmlElement imageElement, BuildContext context) {
   var properties = imageElement.getElement("properties");
@@ -21,6 +21,9 @@ ICImage getImage(XmlElement imageElement, BuildContext context) {
         var size = getSize(property);
         image.setSize(heightArg:size[0], widthArg:size[1]);
         break;
+      case "location":
+        var location = getLocation(property);
+        image.setLocation(topArg: location[0], leftArg: location[1]);
       case "shape":
         image.setShape(getString(property));
         break;
@@ -30,12 +33,4 @@ ICImage getImage(XmlElement imageElement, BuildContext context) {
   }
 
   return image;
-}
-
-Widget buildImage(XmlElement imageElement, BuildContext context){
-  var image = getImage(imageElement, context);
-  var height = image.height;
-  var width = image.width;
-
-  return SizedBox(height: height, width: width, child: image.toFlutter(context));
 }
