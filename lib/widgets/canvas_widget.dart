@@ -75,11 +75,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         infinicardProvider.pendingAction = action;
         break;
       case Tools.line:
-        infinicardProvider.pendingAction = LineAction(
-          _createPoint(event),
-          _createPoint(event,
-          )
-        );
+        LineAction action = LineAction(_createPoint(event),_createPoint(event));
+        action.initPath();
+        infinicardProvider.pendingAction = action;
         break;
       case Tools.erase:
         EraseAction action = EraseAction([_createPoint(event)]);
@@ -122,10 +120,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         break;
       case Tools.line:
         final pendingAction = infinicardProvider.pendingAction as LineAction;
-        infinicardProvider.pendingAction = LineAction(
-          pendingAction.point1,
-          _createPoint(event)
-        );
+        LineAction action = LineAction(pendingAction.point1,_createPoint(event));
+        action.initPath();
+        infinicardProvider.pendingAction = action;
       case Tools.erase:
         final pendingAction = infinicardProvider.pendingAction as EraseAction;
         pendingAction.points.add(_createPoint(event));
@@ -161,12 +158,10 @@ class CanvasWidgetState extends State<CanvasWidget> {
         Rect box = Rect.fromPoints(Offset(action.point1.x, action.point1.y),Offset(action.point2.x, action.point2.y));
         action.rect = box;
 
-        List<Rect> containedElements = elementsWithin(action, infinicardProvider);
-        Rect newBox = combineRect(containedElements, action);
-        debugPrint(newBox.toString());
-
+        List<Rect> containedStrokes = strokesWithin(action, infinicardProvider);
+        Rect newBox = combineRect(containedStrokes, action);
         action.rect = newBox;
-
+        
         infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
         OverlayEntry entry = infinicardProvider.entry;
         if(entry.mounted){
@@ -194,27 +189,32 @@ class CanvasWidgetState extends State<CanvasWidget> {
     
     infinicardProvider.pendingAction = NullAction();
   }
-    List<Rect> elementsWithin(BoxAction box, InfinicardStateProvider infinicardProvider){
+
+  List<Rect> strokesWithin(BoxAction box, InfinicardStateProvider infinicardProvider){
     List<Rect> elements = [];
     for(DrawAction action in infinicardProvider.drawing.drawActions){
-      if(action is BoxAction){
+      if(action is StrokeAction){
         if(contained(box, action)){
-          elements.add(action.rect);
+          elements.add(action.strokePath.getBounds());
+        }
+      } else if(action is LineAction){
+        if(contained(box, action)){
+          elements.add(action.linePath.getBounds());
         }
       }
     }
     return elements;
   }
 
-  Rect combineRect(List<Rect> boxes, BoxAction action){
+  Rect combineRect(List<Rect> elements, BoxAction action){
     Rect box = action.rect;
-    if(boxes.length>1){
-      box = boxes[0];
-      for(int i=1; i<boxes.length; i++){
-        box = box.expandToInclude(boxes[i]).inflate(5.0);
+    if(elements.length>1){
+      box = elements[0];
+      for(int i=1; i<elements.length; i++){
+        box = box.expandToInclude(elements[i]).inflate(5.0);
       }
-    } else if(boxes.length==1){
-      box = boxes[0].inflate(5.0);
+    } else if(elements.length==1){
+      box = elements[0].inflate(5.0);
     } else {
       box = action.rect;
     }

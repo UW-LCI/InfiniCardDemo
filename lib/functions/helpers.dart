@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
+import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
+import 'package:infinicard_v1/models/draw_actions/line_action.dart';
+import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/objects/ICColor.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:xml/xml.dart';
@@ -307,13 +310,23 @@ Map getAction(XmlElement onPressedElement){
   return action;
 }
 
-bool contained(BoxAction parent, BoxAction child) {
-  if (parent.rect.contains(child.rect.topLeft) &&
-      parent.rect.contains(child.rect.topRight) &&
-      parent.rect.contains(child.rect.bottomLeft) &&
-      parent.rect.contains(child.rect.bottomRight)) {
-    return true;
-  } else {
-    return false;
+bool contained(BoxAction parent, DrawAction child) {
+  Rect childRect = Rect.zero;
+  if(child is LineAction){
+    childRect = child.linePath.getBounds();
+  } else if(child is StrokeAction){
+    childRect = child.strokePath.getBounds();
   }
+  if(childRect != Rect.zero){
+    if (parent.rect.contains(childRect.topLeft) &&
+      parent.rect.contains(childRect.topRight) &&
+      parent.rect.contains(childRect.bottomLeft) &&
+      parent.rect.contains(childRect.bottomRight)) {
+    return true;
+    } else {
+      return false;
+    }
+  }
+  return false;
+
 }

@@ -307,9 +307,7 @@ class InfinicardStateProvider extends ChangeNotifier {
     selectedAction = NullAction();
     for (DrawAction action in clickableActions) {
       if (action is BoxAction) {
-        Rect box = Rect.fromPoints(Offset(action.point1.x, action.point1.y),
-            Offset(action.point2.x, action.point2.y));
-        action.rect = box;
+        Rect box = action.rect;
         if (box.contains(Offset(selectAction.point.x, selectAction.point.y))) {
           possibleSelections.add(action);
         }
