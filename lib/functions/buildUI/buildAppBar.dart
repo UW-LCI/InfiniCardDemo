@@ -26,8 +26,10 @@ ICAppBar getBar(XmlElement bar, BuildContext context){
       case "size":
         var size = getSize(property);
         appBar.setSize(heightArg:size[0], widthArg:size[1]);
-      case "text":
-        appBar.setTitle(getText(property, context));
+      case "title":
+        if(property.firstElementChild != null){
+          XmlElement title = property.firstElementChild as XmlElement;
+          appBar.setTitle(getText(title, context));}
         break;
       case "centerTitle":
         appBar.setCenterTitle(getCenter(property));

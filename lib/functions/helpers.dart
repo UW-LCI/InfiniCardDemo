@@ -316,6 +316,8 @@ bool contained(BoxAction parent, DrawAction child) {
     childRect = child.linePath.getBounds();
   } else if(child is StrokeAction){
     childRect = child.strokePath.getBounds();
+  } else if(child is BoxAction){
+    childRect = child.rect;
   }
   if(childRect != Rect.zero){
     if (parent.rect.contains(childRect.topLeft) &&

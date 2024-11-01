@@ -128,6 +128,38 @@ ICObject compileElement(
       element = icon;
       break;
     case "bar":
+      List<BoxAction> childrenWidgets = getChildren(action, canvasActions);
+      List<BoxAction> actionBoxes = [];
+      List<ICObject> actions = [];
+      List<ICObject> leadingElements = [];
+      ICObject? leadingWidget;
+      ICObject? title;
+      for (BoxAction child in childrenWidgets) {
+        if(child.elementName == 'iconButton' || child.elementName == 'textButton'){
+          actionBoxes.add(child);
+        } else if(child.elementName == 'text'){
+          title = compileElement(child, canvasActions, ui);
+        } else {
+          leadingElements.add(compileElement(child, canvasActions, ui));
+        }
+        child.active = false;
+        List<XmlElement> existing = ui
+            .findAllElements(child.elementName)
+            .where((tag) => tag.getAttribute('id') == child.uniqueID.toString())
+            .toList();
+        for (XmlElement element in existing) {
+          element.remove();
+        }
+      }
+      actionBoxes.sort((a, b) => a.rect.left.compareTo(b.rect.left));
+      for(BoxAction action in actionBoxes){
+        actions.add(compileElement(action, canvasActions, ui));
+      }
+      if(leadingElements.length > 1){
+        leadingWidget = ICRow(leadingElements);
+      } else if(leadingElements.length == 1){
+        leadingWidget = leadingElements[0];
+      }
       ICAppBar bar = ICAppBar();
       bar.id = action.uniqueID;
       bar.setSize(heightArg: action.rect.height, widthArg: action.rect.width);
@@ -135,6 +167,15 @@ ICObject compileElement(
       bar.setLocation(
           leftArg: action.rect.topLeft.dx, topArg: action.rect.topLeft.dy);
       bar.setBackgroundColor(ICColor("white"));
+      if(actions.isNotEmpty){
+        bar.setActions(actions);
+      }
+      if(leadingWidget != null){
+        bar.setLeading(leadingWidget);
+      }
+      if(title != null){
+        bar.setTitle(title);
+      }
       element = bar;
       break;
     default:

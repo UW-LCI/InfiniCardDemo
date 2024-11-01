@@ -159,8 +159,15 @@ class CanvasWidgetState extends State<CanvasWidget> {
         action.rect = box;
 
         List<Rect> containedStrokes = strokesWithin(action, infinicardProvider);
+        List<Rect> containedBoxes = boxesWithin(action, infinicardProvider);
+        Rect boundingBox = combineRect(containedBoxes, action);
         Rect newBox = combineRect(containedStrokes, action);
-        action.rect = newBox;
+
+        if(boundingBox.size > newBox.size && containedBoxes.isNotEmpty){
+          action.rect = boundingBox.inflate(5);
+        } else {
+          action.rect = newBox;
+        }
         
         infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
         OverlayEntry entry = infinicardProvider.entry;
@@ -206,15 +213,28 @@ class CanvasWidgetState extends State<CanvasWidget> {
     return elements;
   }
 
+  List<Rect> boxesWithin(BoxAction box, InfinicardStateProvider infinicardProvider){
+    List<Rect> elements = [];
+    for(DrawAction action in infinicardProvider.drawing.drawActions){
+      if(action is BoxAction){
+        if(contained(box, action)){
+          elements.add(action.rect);
+        }
+      } 
+    }
+    return elements;
+  }
+
   Rect combineRect(List<Rect> elements, BoxAction action){
     Rect box = action.rect;
     if(elements.length>1){
       box = elements[0];
       for(int i=1; i<elements.length; i++){
-        box = box.expandToInclude(elements[i]).inflate(5.0);
+        box = box.expandToInclude(elements[i]);
       }
+      box = box.inflate(5);
     } else if(elements.length==1){
-      box = elements[0].inflate(5.0);
+      box = elements[0].inflate(5);
     } else {
       box = action.rect;
     }

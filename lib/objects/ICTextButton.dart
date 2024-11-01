@@ -34,6 +34,9 @@ class ICTextButton extends ICObject{
   void setSize({double? heightArg, double? widthArg}){
     height = heightArg;
     width = widthArg;
+    if(heightArg != null && widthArg !=null){
+      child.setSize(heightArg: height!/2, widthArg: width!/2);
+    }
   }
 
   void setLocation({double? topArg, double? leftArg}){

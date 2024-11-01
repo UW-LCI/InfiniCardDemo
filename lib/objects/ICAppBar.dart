@@ -96,7 +96,15 @@ class ICAppBar extends ICObject{
     final toolHeightElement = toolbarHeight != null ? XmlElement(XmlName("toolbarHeight"), [], [XmlText(toolbarHeight.toString())]) : XmlElement(XmlName("toolbarHeight"), [], [XmlText("")]);
     final centerElement = centerTitle != null ? XmlElement(XmlName("centerTitle"), [], [XmlText(centerTitle.toString())]) : XmlElement(XmlName("centerTitle"), [], [XmlText("")]);
 
-    final titleElement = title != null ? title!.toXml(verbose: verbose) : ICText("").toXml(verbose: verbose);
+    final titleElement = XmlElement(XmlName("title"));
+    final textElement = title != null ? title!.toXml(verbose: verbose) : ICText("").toXml(verbose: verbose);
+    titleElement.children.add(textElement);
+
+    final leadingElement = XmlElement(XmlName("leading"));
+    if(leading!=null){
+      leadingElement.children.add(leading!.toXml(verbose: verbose));
+    }
+    
     
     final actionsElement = XmlElement(XmlName("actions"), [], [XmlText("")]);
     final actionElements = actions?.map((action) => action.toXml(verbose: verbose)).toList();
@@ -117,6 +125,7 @@ class ICAppBar extends ICObject{
       if(toolbarHeight != null){propertiesElement.children.add(toolHeightElement);}
       if(centerTitle != null){propertiesElement.children.add(centerElement);}
       if(title != null){propertiesElement.children.add(titleElement);}
+      if(leading != null){propertiesElement.children.add(leadingElement);}
       if(actions != null){propertiesElement.children.add(actionsElement);}
       if(propertiesElement.children.isNotEmpty){element.children.add(propertiesElement);}
     } else {
@@ -133,6 +142,7 @@ class ICAppBar extends ICObject{
       propertiesElement.children.add(toolHeightElement);
       propertiesElement.children.add(centerElement);
       propertiesElement.children.add(titleElement);
+      propertiesElement.children.add(leadingElement);
       propertiesElement.children.add(actionsElement);
       element.children.add(propertiesElement);
     }
