@@ -54,26 +54,25 @@ class InfinicardStateProvider extends ChangeNotifier {
 
   DropdownMenu initDropdown(List<DropdownMenuEntry> element, String? label) {
     return DropdownMenu(
-        dropdownMenuEntries: element,
-        initialSelection: label,
-        menuStyle:
-            MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
-        inputDecorationTheme: InputDecorationTheme(
-            filled: true, fillColor: Colors.lightBlue[50]),
-        onSelected:(value) {
-          if(selectedAction is BoxAction){
-            BoxAction action = selectedAction as BoxAction;
-            action.elementName = value;
-            updateSource(compileDrawing(getActiveActions()));
-          } else if(_pastActions.last is BoxAction){
-            BoxAction action = _pastActions.last as BoxAction;
-            action.elementName = value;
-            updateSource(compileDrawing(getActiveActions()));
-          }
-          _clearOverlay();
-          
-        },);
-        
+      dropdownMenuEntries: element,
+      initialSelection: label,
+      menuStyle:
+          MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
+      inputDecorationTheme:
+          InputDecorationTheme(filled: true, fillColor: Colors.lightBlue[50]),
+      onSelected: (value) {
+        if (selectedAction is BoxAction) {
+          BoxAction action = selectedAction as BoxAction;
+          action.elementName = value;
+          updateSource(compileDrawing(getActiveActions()));
+        } else if (_pastActions.last is BoxAction) {
+          BoxAction action = _pastActions.last as BoxAction;
+          action.elementName = value;
+          updateSource(compileDrawing(getActiveActions()));
+        }
+        _clearOverlay();
+      },
+    );
   }
 
   //Draw Methods
@@ -105,7 +104,7 @@ class InfinicardStateProvider extends ChangeNotifier {
 
   Tools get toolSelected => _toolSelected;
 
-  List<DrawAction> getActiveActions(){
+  List<DrawAction> getActiveActions() {
     final futureIndexOfLastClearAction =
         _pastActions.lastIndexWhere((element) => element is ClearAction);
     if (futureIndexOfLastClearAction == -1) {
@@ -114,7 +113,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       final actions = _pastActions
           .getRange(futureIndexOfLastClearAction, _pastActions.length)
           .toList();
-     return actions;
+      return actions;
     }
   }
 
@@ -132,12 +131,11 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
   }
 
-  _clearOverlay(){
-    if(entry.mounted){
+  _clearOverlay() {
+    if (entry.mounted) {
       entry.remove();
     }
   }
-  
 
   _invalidateAndNotify() {
     _drawing = null;
@@ -315,7 +313,8 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
     if (possibleSelections.length == 1) {
       selectedAction = possibleSelections[0];
-      dropdown = initDropdown(dropdownElements, possibleSelections[0].elementName);
+      dropdown =
+          initDropdown(dropdownElements, possibleSelections[0].elementName);
       entry = OverlayEntry(
           builder: (context) => Positioned(
               top: selectAction.point.y,
@@ -338,6 +337,93 @@ class InfinicardStateProvider extends ChangeNotifier {
               top: selectAction.point.y,
               left: selectAction.point.x,
               child: Container(width: 200, height: 100, child: dropdown)));
+    }
+  }
+
+  BoxAction? clickedBox(SelectBoxAction selectAction) {
+    List<DrawAction> clickableActions = [];
+    List<BoxAction> possibleSelections = [];
+    final futureIndexOfLastClearAction =
+        _pastActions.lastIndexWhere((element) => element is ClearAction);
+    if (futureIndexOfLastClearAction == -1) {
+      // never been cleared
+      clickableActions = _pastActions;
+    } else {
+      clickableActions = _pastActions
+          .getRange(futureIndexOfLastClearAction, _pastActions.length)
+          .toList();
+    }
+    selectedAction = NullAction();
+    for (DrawAction action in clickableActions) {
+      if (action is BoxAction) {
+        Rect box = action.rect;
+        List<Rect> touchPoints = [
+          Rect.fromCircle(center: box.bottomRight, radius: 5),
+          Rect.fromCircle(center: box.topRight, radius: 5),
+          Rect.fromCircle(center: box.bottomLeft, radius: 5),
+          Rect.fromCircle(center: box.topLeft, radius: 5)
+        ];
+        if (box.contains(Offset(selectAction.point.x, selectAction.point.y))) {
+          possibleSelections.add(action);
+        } else {
+          for(Rect point in touchPoints){
+            if (point.contains(Offset(selectAction.point.x, selectAction.point.y))) {
+              possibleSelections.add(action);
+            }
+          }
+        }
+      }
+    }
+    if (possibleSelections.length == 1) {
+      selectedAction = possibleSelections[0];
+    } else if (possibleSelections.length > 1) {
+      Size smallest = possibleSelections[0].rect.size;
+      BoxAction current = possibleSelections[0];
+      for (BoxAction each in possibleSelections) {
+        Size boxSize = each.rect.size;
+        if (boxSize < smallest) {
+          current = each;
+          smallest = boxSize;
+        }
+      }
+      selectedAction = current;
+    }
+    if (selectedAction is BoxAction) {
+      BoxAction action = selectedAction as BoxAction;
+      Offset point = Offset(selectAction.point.x, selectAction.point.y);
+      Rect selectedBox = action.rect;
+      if (Rect.fromCircle(center: selectedBox.topRight, radius: 5)
+          .contains(point)) {
+        selectAction.resize = true;
+        selectAction.anchor = selectedBox.bottomLeft;
+      } else if (Rect.fromCircle(center: selectedBox.topLeft, radius: 5)
+          .contains(point)) {
+        selectAction.resize = true;
+        selectAction.anchor = selectedBox.bottomRight;
+      } else if (Rect.fromCircle(center: selectedBox.bottomRight, radius: 5)
+          .contains(point)) {
+        selectAction.resize = true;
+        selectAction.anchor = selectedBox.topLeft;
+      } else if (Rect.fromCircle(center: selectedBox.bottomLeft, radius: 5)
+          .contains(point)) {
+        selectAction.resize = true;
+        selectAction.anchor = selectedBox.topRight;
+      } else {
+        selectAction.resize = false;
+      }
+      return selectedAction as BoxAction;
+    } else {
+      return null;
+    }
+  }
+
+  void resize(SelectBoxAction clickAction) {
+    if (clickAction.selected != null &&
+        clickAction.resize &&
+        clickAction.anchor != null) {
+      BoxAction action = clickAction.selected as BoxAction;
+      Offset point = Offset(clickAction.point.x, clickAction.point.y);
+      action.rect = Rect.fromPoints(clickAction.anchor!, point);
     }
   }
 

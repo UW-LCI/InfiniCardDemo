@@ -66,7 +66,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
         infinicardProvider.pendingAction = NullAction();
         break;
       case Tools.select:
-        SelectBoxAction action = SelectBoxAction(_createPoint(event));
+        SelectBoxAction action = SelectBoxAction(_createPoint(event),_createPoint(event));
+        action.selected = infinicardProvider.clickedBox(action);
         infinicardProvider.pendingAction = action;
         break;
       case Tools.stroke:
@@ -109,8 +110,12 @@ class CanvasWidgetState extends State<CanvasWidget> {
       case Tools.none:
         break;
       case Tools.select:
-        SelectBoxAction action = SelectBoxAction(_createPoint(event));
-        infinicardProvider.pendingAction = action;
+        final pendingAction = infinicardProvider.pendingAction as SelectBoxAction;
+        pendingAction.point = _createPoint(event);
+        if(pendingAction.point.distanceTo(pendingAction.startPoint) >2){
+          infinicardProvider.resize(pendingAction);
+        }
+        infinicardProvider.pendingAction = pendingAction;
         break;
       case Tools.stroke:
         final pendingAction = infinicardProvider.pendingAction as StrokeAction;
@@ -143,15 +148,18 @@ class CanvasWidgetState extends State<CanvasWidget> {
   void _handlePointerUp(
       PointerUpEvent event, InfinicardStateProvider infinicardProvider, BuildContext context) {
     if(infinicardProvider.toolSelected == Tools.select){
+      SelectBoxAction action = infinicardProvider.pendingAction as SelectBoxAction;
       OverlayEntry entry = infinicardProvider.entry;
       if(entry.mounted){
         entry.remove();
       }
-      infinicardProvider.click(infinicardProvider.pendingAction as SelectBoxAction);
+      infinicardProvider.click(action);
       OverlayEntry newEntry = infinicardProvider.entry;
       if(entry != newEntry){
         Overlay.of(context).insert(newEntry);
       }
+
+      
     }
     else if(infinicardProvider.toolSelected == Tools.box){
         BoxAction action = infinicardProvider.pendingAction as BoxAction;

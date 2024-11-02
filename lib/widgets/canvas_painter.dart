@@ -87,10 +87,23 @@ class CanvasPainter extends CustomPainter {
           ..strokeWidth = 2
           ..color = boxColor;
           paint.style = PaintingStyle.stroke;
+          final paint2 = Paint()
+          ..strokeWidth = 2
+          ..color = boxColor;
+          paint2.style = PaintingStyle.fill;
           Rect box = action.rect;
           Path boxPath = Path();
+          Path touchPoints = Path();
+
+          touchPoints.addOval(Rect.fromCircle(center:box.topRight,radius: 5));
+          touchPoints.addOval(Rect.fromCircle(center:box.topLeft,radius: 5));
+          touchPoints.addOval(Rect.fromCircle(center:box.bottomRight,radius: 5));
+          touchPoints.addOval(Rect.fromCircle(center:box.bottomLeft,radius: 5));
+
           boxPath.addRect(box);
+          
           canvas.drawPath(boxPath, paint);
+          canvas.drawPath(touchPoints, paint2);
           break;
         case EraseAction eraseAction:
           final paint = Paint()
