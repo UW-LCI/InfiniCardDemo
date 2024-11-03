@@ -15,10 +15,14 @@ class ICIconButton extends ICObject{
 
   double? iconSize;
 
+  @override
   double? height;
+  @override
   double? width;
 
+  @override
   double? top;
+  @override
   double? left;
 
   int id = -1;

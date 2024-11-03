@@ -26,7 +26,7 @@ class CanvasWidget extends StatefulWidget {
 }
 
 class CanvasWidgetState extends State<CanvasWidget> {
-  List<List<GesturePoint>> _strokes = [];
+  final List<List<GesturePoint>> _strokes = [];
   // List<List<GesturePoint>> _undoQueue = [];
   // List<List<GesturePoint>> _clearedStrokes = [];
   // StrokeAction _currentStroke;
@@ -186,7 +186,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
           builder: (context) => Positioned(
               top: action.point2.y,
               left: action.point2.x,
-              child: Container(width: 200, height: 100, child: infinicardProvider.dropdown)));
+              child: SizedBox(width: 200, height: 100, child: infinicardProvider.dropdown)));
         OverlayEntry newEntry = infinicardProvider.entry;
         if(entry != newEntry){
           Overlay.of(context).insert(newEntry);

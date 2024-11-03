@@ -6,10 +6,14 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 class ICImage extends ICObject{
   String path;
 
+  @override
   double? width = 50;
+  @override
   double? height = 50;
 
+  @override
   double? top;
+  @override
   double? left;
 
   String semanticLabel = "";

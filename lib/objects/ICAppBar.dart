@@ -12,10 +12,14 @@ class ICAppBar extends ICObject{
   List<ICObject>? actions;
   double? toolbarHeight;
 
+  @override
   double? height;
+  @override
   double? width;
   
+  @override
   double? top;
+  @override
   double? left;
 
   ICColor? backgroundColor;
