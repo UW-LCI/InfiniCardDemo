@@ -1,10 +1,7 @@
-import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:infinicard_v1/functions/buildUI/buildIcon.dart";
 import "package:infinicard_v1/functions/buildUI/buildIconButton.dart";
-import "package:infinicard_v1/objects/ICColumn.dart";
-import "package:infinicard_v1/objects/ICRow.dart";
 import 'package:xml/xml.dart';
 
 import "buildAppBar.dart";

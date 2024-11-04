@@ -10,10 +10,14 @@ class ICText extends ICObject{
   TextAlign textAlign = TextAlign.left;
   bool styled = false;
 
+  @override
   double? height = 10;
+  @override
   double? width = 10;
   
+  @override
   double? top = 10;
+  @override
   double? left = 10;
 
   int id = -1;

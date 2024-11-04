@@ -10,10 +10,14 @@ class ICIcon extends ICObject{
   ICColor? iconColor;
   double? iconSize;
 
+  @override
   double? height;
+  @override
   double? width;
   
+  @override
   double? top;
+  @override
   double? left;
 
   int id = -1;

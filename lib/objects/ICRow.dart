@@ -12,10 +12,14 @@ class ICRow extends ICObject{
 
   int id = -1;
 
+  @override
   double? height = 10;
+  @override
   double? width = 10;
   
+  @override
   double? top = 10;
+  @override
   double? left = 10;
 
   ICRow(this.children);

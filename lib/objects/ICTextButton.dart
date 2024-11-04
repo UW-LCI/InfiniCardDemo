@@ -10,10 +10,14 @@ class ICTextButton extends ICObject{
   Map? action;
   ICText child = ICText("Button");
 
+  @override
   double? height;
+  @override
   double? width;
 
+  @override
   double? top;
+  @override
   double? left;
 
   int id = -1;

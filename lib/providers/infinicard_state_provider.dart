@@ -34,19 +34,19 @@ class InfinicardStateProvider extends ChangeNotifier {
   final double height;
 
   final List<DropdownMenuEntry> dropdownElements = [
-    DropdownMenuEntry(value: 'textButton', label: 'textButton'),
-    DropdownMenuEntry(value: 'text', label: 'text'),
-    DropdownMenuEntry(value: 'image', label: 'image'),
-    DropdownMenuEntry(value: 'row', label: 'row'),
-    DropdownMenuEntry(value: 'column', label: 'column'),
-    DropdownMenuEntry(value: 'iconButton', label: 'iconButton'),
-    DropdownMenuEntry(value: 'bar', label: 'bar'),
-    DropdownMenuEntry(value: 'icon', label: 'icon')
+    const DropdownMenuEntry(value: 'textButton', label: 'textButton'),
+    const DropdownMenuEntry(value: 'text', label: 'text'),
+    const DropdownMenuEntry(value: 'image', label: 'image'),
+    const DropdownMenuEntry(value: 'row', label: 'row'),
+    const DropdownMenuEntry(value: 'column', label: 'column'),
+    const DropdownMenuEntry(value: 'iconButton', label: 'iconButton'),
+    const DropdownMenuEntry(value: 'bar', label: 'bar'),
+    const DropdownMenuEntry(value: 'icon', label: 'icon')
   ];
   DropdownMenu? dropdown;
 
   OverlayEntry entry = OverlayEntry(builder: (BuildContext context) {
-    return Container(width: 1, height: 0, child: Text("HELLO"));
+    return SizedBox(width: 1, height: 0, child: const Text("HELLO"));
   });
 
   InfinicardStateProvider({required this.width, required this.height})
@@ -58,7 +58,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       dropdownMenuEntries: element,
       initialSelection: label,
       menuStyle:
-          MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
+          const MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
       inputDecorationTheme:
           InputDecorationTheme(filled: true, fillColor: Colors.lightBlue[50]),
       onSelected: (value) {
@@ -320,7 +320,7 @@ class InfinicardStateProvider extends ChangeNotifier {
           builder: (context) => Positioned(
               top: selectAction.point.y,
               left: selectAction.point.x,
-              child: Container(width: 200, height: 100, child: dropdown)));
+              child: SizedBox(width: 200, height: 100, child: dropdown)));
     } else if (possibleSelections.length > 1) {
       Size smallest = possibleSelections[0].rect.size;
       BoxAction current = possibleSelections[0];
@@ -337,7 +337,7 @@ class InfinicardStateProvider extends ChangeNotifier {
           builder: (context) => Positioned(
               top: selectAction.point.y,
               left: selectAction.point.x,
-              child: Container(width: 200, height: 100, child: dropdown)));
+              child: SizedBox(width: 200, height: 100, child: dropdown)));
     }
   }
 
