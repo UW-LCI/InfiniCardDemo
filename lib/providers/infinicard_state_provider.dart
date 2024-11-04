@@ -433,15 +433,19 @@ class InfinicardStateProvider extends ChangeNotifier {
         double scaleX = action.rect.width / oldBox.width;
         double scaleY = action.rect.height / oldBox.height;
         if(stroke is StrokeAction){
-          matrix.translate(action.rect.center.dx, action.rect.center.dy);
-          matrix.scale(scaleX, scaleY);
-          matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
-          stroke.strokePath = stroke.strokePath.transform(matrix.storage);
+          if(stroke.box == action){
+            matrix.translate(action.rect.center.dx, action.rect.center.dy);
+            matrix.scale(scaleX, scaleY);
+            matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
+            stroke.strokePath = stroke.strokePath.transform(matrix.storage);
+          }
         } else if(stroke is LineAction){
-          matrix.translate(action.rect.center.dx, action.rect.center.dy);
-          matrix.scale(scaleX, scaleY);
-          matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
-          stroke.linePath = stroke.linePath.transform(matrix.storage);
+          if(stroke.box == action){
+            matrix.translate(action.rect.center.dx, action.rect.center.dy);
+            matrix.scale(scaleX, scaleY);
+            matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
+            stroke.linePath = stroke.linePath.transform(matrix.storage);
+          }
         }
       }
 
@@ -455,9 +459,13 @@ class InfinicardStateProvider extends ChangeNotifier {
       action.rect = action.rect.shift(shift);
       for(DrawAction stroke in strokes){
         if(stroke is StrokeAction){
-          stroke.strokePath = stroke.strokePath.shift(shift);
+          if(stroke.box == action){
+            stroke.strokePath = stroke.strokePath.shift(shift);
+          }
         } else if(stroke is LineAction){
-          stroke.linePath = stroke.linePath.shift(shift);
+          if(stroke.box == action){
+            stroke.linePath = stroke.linePath.shift(shift);
+          }
         }
       }
     }

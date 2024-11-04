@@ -164,7 +164,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
         List<Rect> containedStrokes = strokesWithin(action, infinicardProvider);
         List<Rect> containedBoxes = boxesWithin(action, infinicardProvider);
-        //check which strokes don't have other bounding boxes and add them to box.strokes
+
         Rect boundingBox = combineRect(containedBoxes, action);
         Rect newBox = combineRect(containedStrokes, action);
 
@@ -172,6 +172,16 @@ class CanvasWidgetState extends State<CanvasWidget> {
           action.rect = boundingBox.inflate(5);
         } else {
           action.rect = newBox;
+        }
+
+        //assign box to stroke
+        List<DrawAction> containedStrokeActions = strokeActionsWithin(action, infinicardProvider);
+        for(DrawAction stroke in containedStrokeActions){
+          if(stroke is StrokeAction){
+            stroke.box ??= action;
+          } else if (stroke is LineAction){
+            stroke.box ??=action;
+          }
         }
         
         infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
@@ -212,6 +222,22 @@ class CanvasWidgetState extends State<CanvasWidget> {
       } else if(action is LineAction){
         if(contained(box, action)){
           elements.add(action.linePath.getBounds());
+        }
+      }
+    }
+    return elements;
+  }
+
+  List<DrawAction> strokeActionsWithin(BoxAction box, InfinicardStateProvider infinicardProvider){
+    List<DrawAction> elements = [];
+    for(DrawAction action in infinicardProvider.drawing.drawActions){
+      if(action is StrokeAction){
+        if(contained(box, action)){
+          elements.add(action);
+        }
+      } else if(action is LineAction){
+        if(contained(box, action)){
+          elements.add(action);
         }
       }
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
+import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 
 import '../draw_actions.dart';
 
@@ -11,6 +12,8 @@ class StrokeAction extends DrawAction {
   Path strokePath = Path();
 
   StrokeAction(this.points);
+
+  BoxAction? box;
 
   void addLine(GesturePoint point){
     strokePath.lineTo(point.x, point.y);

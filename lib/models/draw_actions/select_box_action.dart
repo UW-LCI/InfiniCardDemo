@@ -10,6 +10,8 @@ class SelectBoxAction extends DrawAction {
   GesturePoint prevPoint;
 
   BoxAction? selected;
+
+  //designates an element as having been clicked in the resize locations
   bool resize = false;
   Offset? anchor;
 
