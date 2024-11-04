@@ -13,8 +13,6 @@ class BoxAction extends DrawAction {
 
   String elementName = "";
 
-  List<DrawAction> strokes = [];
-
   Rect rect = Rect.fromPoints(Offset.zero, Offset.zero);
 
   BoxAction(this.point1, this.point2);

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import "package:infinicard_v1/functions/buildUI/buildIcon.dart";
 import "package:infinicard_v1/functions/buildUI/buildIconButton.dart";
@@ -14,34 +13,50 @@ import "buildColumn.dart";
 import "package:infinicard_v1/objects/ICObject.dart";
 import "package:infinicard_v1/objects/ICText.dart";
 
-Widget buildXML(List<ICObject> uiElements, BuildContext context){
+Widget buildXML(List<ICObject> uiElements, BuildContext context) {
+  var uiWidgets =
+      uiElements.map((element) => buildUIElement(element, context)).toList();
 
-  var uiWidgets = uiElements.map((element) => buildUIElement(element, context)).toList();
+  // var target = DragTarget(
+  //     onWillAcceptWithDetails: (details) {
+  //       return true;
+  //     },
+  //     onAcceptWithDetails: (details) => {debugPrint("accept")},
+  //     builder: (
+  //       BuildContext context,
+  //       List<dynamic> accepted,
+  //       List<dynamic> rejected,
+  //     ) {
+  //       return Stack(children: uiWidgets);
+  //     });
 
-  return Stack(children:uiWidgets);
+  return Stack(children: uiWidgets);
 }
 
-List<ICObject> getXML(String xml, BuildContext context){
+List<ICObject> getXML(String xml, BuildContext context) {
   final document = XmlDocument.parse(xml);
   final root = document.getElement("root");
   final ui = root?.getElement("ui");
   final elements = ui?.childElements;
 
   List<ICObject> uiElements = [];
-  if(elements!=null){uiElements = getUIElements(elements, context);}
+  if (elements != null) {
+    uiElements = getUIElements(elements, context);
+  }
   return uiElements;
 }
 
-List<ICObject> getUIElements(Iterable<XmlElement> elements, BuildContext context){
+List<ICObject> getUIElements(
+    Iterable<XmlElement> elements, BuildContext context) {
   List<ICObject> uiElements = [];
 
-  for(var child in elements){
+  for (var child in elements) {
     uiElements.add(getUIElement(child, context));
   }
   return uiElements;
 }
 
-Widget buildUIElement(ICObject element, BuildContext context){
+Widget buildUIElement(ICObject element, BuildContext context) {
   var height = element.height;
   var width = element.width;
 
@@ -55,14 +70,34 @@ Widget buildUIElement(ICObject element, BuildContext context){
   // } else {
   //   return Positioned(top: top, left: left, height: height, width: width, child: element.toFlutter(context));
   // }
-  return Positioned(top: top, left: left, height: height, width: width, child: element.toFlutter(context));
-  
+  var uiElement = element.toFlutter(context);
+  // return Positioned(
+  //     top: top,
+  //     left: left,
+  //     height: height,
+  //     width: width,
+  //     child: Draggable(
+  //       feedback: uiElement,
+  //       onDragEnd: (dragDetails) {
+  //         left = dragDetails.offset.dx;
+  //         top = dragDetails.offset.dy;
+  //       },
+  //       data: 10,
+  //       child: uiElement,
+  //     ));
+  return Positioned(
+      top: top,
+      left: left,
+      height: height,
+      width: width,
+      child: uiElement,
+      );
 }
 
-ICObject getUIElement(XmlElement child, BuildContext context){
+ICObject getUIElement(XmlElement child, BuildContext context) {
   ICObject uiElement;
   final type = child.name.toString();
-  switch (type){
+  switch (type) {
     case "bar":
       uiElement = getBar(child, context);
       break;
