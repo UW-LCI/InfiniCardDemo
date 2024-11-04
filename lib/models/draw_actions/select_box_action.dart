@@ -7,10 +7,11 @@ import '../draw_actions.dart';
 class SelectBoxAction extends DrawAction {
   GesturePoint point;
   GesturePoint startPoint;
+  GesturePoint prevPoint;
 
   BoxAction? selected;
   bool resize = false;
   Offset? anchor;
 
-  SelectBoxAction(this.startPoint, this.point);
+  SelectBoxAction(this.startPoint, this.point, this.prevPoint);
 }

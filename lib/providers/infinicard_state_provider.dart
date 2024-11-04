@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
 import 'package:infinicard_v1/functions/compileXML/compileDrawing.dart';
+import 'package:infinicard_v1/functions/helpers.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
@@ -417,14 +418,67 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
   }
 
-  void resize(SelectBoxAction clickAction) {
+  void translate(SelectBoxAction clickAction) {
     if (clickAction.selected != null &&
         clickAction.resize &&
         clickAction.anchor != null) {
+      //Scaling
       BoxAction action = clickAction.selected as BoxAction;
+      List<DrawAction> strokes = innerStrokes(action);
       Offset point = Offset(clickAction.point.x, clickAction.point.y);
+      Rect oldBox = action.rect;
       action.rect = Rect.fromPoints(clickAction.anchor!, point);
+      for(DrawAction stroke in strokes){
+        final Matrix4 matrix = Matrix4.identity();
+        double scaleX = action.rect.width / oldBox.width;
+        double scaleY = action.rect.height / oldBox.height;
+        if(stroke is StrokeAction){
+          matrix.translate(action.rect.center.dx, action.rect.center.dy);
+          matrix.scale(scaleX, scaleY);
+          matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
+          stroke.strokePath = stroke.strokePath.transform(matrix.storage);
+        } else if(stroke is LineAction){
+          matrix.translate(action.rect.center.dx, action.rect.center.dy);
+          matrix.scale(scaleX, scaleY);
+          matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
+          stroke.linePath = stroke.linePath.transform(matrix.storage);
+        }
+      }
+
+    } else if (clickAction.selected!=null){
+      //moving
+      BoxAction action = clickAction.selected as BoxAction;
+      List<DrawAction> strokes = innerStrokes(action);
+      Offset point = Offset(clickAction.point.x, clickAction.point.y);
+      Offset previous = Offset(clickAction.prevPoint.x, clickAction.prevPoint.y);
+      Offset shift = point - previous;
+      action.rect = action.rect.shift(shift);
+      for(DrawAction stroke in strokes){
+        if(stroke is StrokeAction){
+          stroke.strokePath = stroke.strokePath.shift(shift);
+        } else if(stroke is LineAction){
+          stroke.linePath = stroke.linePath.shift(shift);
+        }
+      }
     }
+    updateSource(compileDrawing(getActiveActions()));
+  }
+
+  List<DrawAction> innerStrokes(BoxAction box){
+    List<DrawAction> actions = getActiveActions();
+    List<DrawAction> elements = [];
+    for(DrawAction action in actions){
+      if(action is StrokeAction){
+        if(contained(box, action)){
+          elements.add(action);
+        }
+      } else if(action is LineAction){
+        if(contained(box, action)){
+          elements.add(action);
+        }
+      }
+    }
+    return elements;
   }
 
   //Render Methods

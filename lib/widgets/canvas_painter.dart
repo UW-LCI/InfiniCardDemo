@@ -60,23 +60,17 @@ class CanvasPainter extends CustomPainter {
             ..strokeCap = StrokeCap.round
             ..strokeWidth = 5.0;
           paint.style = PaintingStyle.stroke;
-          List<GesturePoint> strokes = strokeAction.points;
-          var path = Path();
-          path.moveTo(strokes[0].x, strokes[0].y);
-          if(strokes.length > 1){
-            for (int i = 1; i < strokes.length; i++) {   
-              path.lineTo(strokes[i].x, strokes[i].y);
-            }
-            canvas.drawPath(path, paint);
-          } else if (strokes.length == 1) {
-            canvas.drawPoints(ui.PointMode.points, [Offset(strokes[0].x, strokes[0].y)], paint);
-          }
+          Path path = strokeAction.strokePath;
+          canvas.drawPath(path, paint);
           break;
         case LineAction lineAction:
           final paint = Paint()
-          ..strokeWidth = 2;
-          canvas.drawLine(Offset(lineAction.point1.x, lineAction.point1.y), 
-            Offset(lineAction.point2.x, lineAction.point2.y), paint);
+            ..color = const ui.Color.fromARGB(255, 0, 0, 0)
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = 5.0;
+          paint.style = PaintingStyle.stroke;
+          Path path = lineAction.linePath;
+          canvas.drawPath(path, paint);
           break;
         case BoxAction boxAction:
           Color boxColor = Colors.blue;

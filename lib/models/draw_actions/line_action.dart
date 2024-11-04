@@ -13,6 +13,7 @@ class LineAction extends DrawAction {
   LineAction(this.point1, this.point2);
 
   void initPath(){
+    linePath = Path();
     linePath.moveTo(point1.x, point1.y);
     linePath.lineTo(point2.x, point2.y);
   }

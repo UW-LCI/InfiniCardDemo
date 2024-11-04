@@ -66,7 +66,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
         infinicardProvider.pendingAction = NullAction();
         break;
       case Tools.select:
-        SelectBoxAction action = SelectBoxAction(_createPoint(event),_createPoint(event));
+        SelectBoxAction action = SelectBoxAction(_createPoint(event),_createPoint(event),_createPoint(event));
         action.selected = infinicardProvider.clickedBox(action);
         infinicardProvider.pendingAction = action;
         break;
@@ -101,19 +101,15 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
   void _handlePointerMove(
       PointerMoveEvent event, InfinicardStateProvider infinicardProvider) {
-    // setState(() {
-    //   _currentStroke.add(_createPoint(event));
-    //   _strokes[_strokes.length - 1] = List.from(_currentStroke);
-    // });
-
     switch (infinicardProvider.toolSelected) {
       case Tools.none:
         break;
       case Tools.select:
         final pendingAction = infinicardProvider.pendingAction as SelectBoxAction;
+        pendingAction.prevPoint = pendingAction.point;
         pendingAction.point = _createPoint(event);
         if(pendingAction.point.distanceTo(pendingAction.startPoint) >2){
-          infinicardProvider.resize(pendingAction);
+          infinicardProvider.translate(pendingAction);
         }
         infinicardProvider.pendingAction = pendingAction;
         break;
@@ -168,6 +164,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
         List<Rect> containedStrokes = strokesWithin(action, infinicardProvider);
         List<Rect> containedBoxes = boxesWithin(action, infinicardProvider);
+        //check which strokes don't have other bounding boxes and add them to box.strokes
         Rect boundingBox = combineRect(containedBoxes, action);
         Rect newBox = combineRect(containedStrokes, action);
 
