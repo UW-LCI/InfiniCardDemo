@@ -258,6 +258,28 @@ class InfinicardStateProvider extends ChangeNotifier {
           if (intersecting > 0) {
             eraseAction.erased.add(strokeAction);
             _pastActions.removeWhere((item) => item == strokeAction);
+            if(strokeAction.box!=null){
+              //find all other strokes in rhe box
+              BoxAction currentBox = strokeAction.box!;
+              currentBox.strokes.removeWhere((item)=> item == strokeAction);
+              if(currentBox.strokes.length == 0){
+                _pastActions.removeWhere((item) => item == currentBox);
+              } else {
+                List<Rect> elements = [];
+                for(DrawAction stroke in currentBox.strokes){
+                  if(stroke is StrokeAction){
+                    elements.add(stroke.strokePath.getBounds());
+                  } else if(stroke is LineAction){
+                    elements.add(stroke.linePath.getBounds());
+                  }
+                  
+                }
+                currentBox.rect = combineRect(elements);
+                updateSource(compileDrawing(getActiveActions()));
+                
+              }
+              
+            }
           }
           break;
         case LineAction lineAction:
@@ -281,6 +303,9 @@ class InfinicardStateProvider extends ChangeNotifier {
           if (intersecting > 0) {
             eraseAction.erased.add(lineAction);
             _pastActions.removeWhere((item) => item == lineAction);
+            if(lineAction.box!=null){
+              _pastActions.removeWhere((item) => item == lineAction.box);
+            }
           }
           break;
       }
@@ -288,6 +313,22 @@ class InfinicardStateProvider extends ChangeNotifier {
     if (eraseAction.erased.isNotEmpty) {
       _pastActions.add(eraseAction);
     }
+  }
+
+  Rect combineRect(List<Rect> elements){
+    Rect box = Rect.zero;
+    if(elements.length>1){
+      box = elements[0];
+      for(int i=1; i<elements.length; i++){
+        box = box.expandToInclude(elements[i]);
+      }
+      box = box.inflate(5);
+    } else if(elements.length==1){
+      box = elements[0].inflate(5);
+    } else {
+      box = Rect.zero;
+    }
+    return box;
   }
 
   click(SelectBoxAction selectAction) {
@@ -340,6 +381,8 @@ class InfinicardStateProvider extends ChangeNotifier {
               child: SizedBox(width: 200, height: 100, child: dropdown)));
     }
   }
+
+  
 
   BoxAction? clickedBox(SelectBoxAction selectAction) {
     List<DrawAction> clickableActions = [];

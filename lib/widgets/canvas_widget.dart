@@ -154,12 +154,35 @@ class CanvasWidgetState extends State<CanvasWidget> {
       if(entry != newEntry){
         Overlay.of(context).insert(newEntry);
       }
-
-      
     }
     else if(infinicardProvider.toolSelected == Tools.box){
         BoxAction action = infinicardProvider.pendingAction as BoxAction;
         Rect box = Rect.fromPoints(Offset(action.point1.x, action.point1.y),Offset(action.point2.x, action.point2.y));
+        if(box.width < 5 && box.height < 5){
+          infinicardProvider.toolSelected = Tools.select;
+          OverlayEntry entry = infinicardProvider.entry;
+          if(entry.mounted){
+            entry.remove();
+          }
+          SelectBoxAction selectedAction = SelectBoxAction(action.point1, action.point1, action.point1);
+          infinicardProvider.click(selectedAction);
+          OverlayEntry newEntry = infinicardProvider.entry;
+          if(entry != newEntry){
+            Overlay.of(context).insert(newEntry);
+          }
+          // debugPrint("***");
+          // BoxAction? clicked = inBounds(action, infinicardProvider);
+          // debugPrint(clicked.toString());
+          // if(clicked!=null){
+          //   infinicardProvider.toolSelected == Tools.select;
+          //   SelectBoxAction selectedAction = SelectBoxAction(clicked.point1, clicked.point1, clicked.point1);
+          //   selectedAction.selected = clicked;
+          //   infinicardProvider.pendingAction = selectedAction;
+          //   debugPrint("clicked");
+            return;
+        }
+          
+        
         action.rect = box;
 
         List<Rect> containedStrokes = strokesWithin(action, infinicardProvider);
@@ -183,6 +206,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
             stroke.box ??=action;
           }
         }
+        action.strokes = containedStrokeActions;
         
         infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
         OverlayEntry entry = infinicardProvider.entry;
@@ -242,6 +266,31 @@ class CanvasWidgetState extends State<CanvasWidget> {
       }
     }
     return elements;
+  }
+
+  BoxAction? inBounds(BoxAction action, InfinicardStateProvider provider){
+    List<DrawAction> actions = provider.getActiveActions();
+    List<BoxAction> clicked = [];
+    BoxAction clickedBox;
+    for(DrawAction pastAction in actions){
+      if(pastAction is BoxAction){
+        if(pastAction.rect.contains(action.rect.center)){
+          clicked.add(pastAction);
+        }
+      }
+    }
+    if(clicked.isNotEmpty){
+      clickedBox = clicked[0];
+      for(BoxAction click in clicked){
+        if(click.rect.size < clickedBox.rect.size){
+          clickedBox = click;
+        }
+      }
+      return clickedBox;
+    } else {
+      return null;
+    }
+    
   }
 
   List<Rect> boxesWithin(BoxAction box, InfinicardStateProvider infinicardProvider){
