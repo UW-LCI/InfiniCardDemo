@@ -4,25 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:provider/provider.dart';
 
-class ControlPanelWidget extends StatelessWidget {
-  // final VoidCallback onClear;
+class ControlPanelWidget extends StatefulWidget {
   final VoidCallback onRecognize;
-  // final VoidCallback onSave;
-  // final VoidCallback onUndo;
-  // final VoidCallback onRedo;
-  // final VoidCallback onDraw;
-  // final VoidCallback onErase;
 
   const ControlPanelWidget({
     super.key,
-    // required this.onClear,
     required this.onRecognize,
-    // required this.onSave,
-    // required this.onUndo,
-    // required this.onRedo,
-    // required this.onDraw,
-    // required this.onErase
   });
+
+  @override
+  ControlPanelWidgetState createState() => ControlPanelWidgetState();
+}
+
+class ControlPanelWidgetState extends State<ControlPanelWidget> {
+  String selected = "";
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,39 +33,48 @@ class ControlPanelWidget extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () => _clear(context),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
             child: const Icon(Icons.delete),
           ),
           ElevatedButton(
-            onPressed: onRecognize,
+            onPressed: widget.onRecognize,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
             child: const Icon(Icons.lightbulb),
           ),
           ElevatedButton(
             onPressed: () => _undo(context),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
             child: const Icon(Icons.undo),
           ),
           ElevatedButton(
             onPressed: () => _redo(context),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
             child: const Icon(Icons.redo),
           ),
           ElevatedButton(
             onPressed: () => _cursor(context),
+            style: ElevatedButton.styleFrom(backgroundColor: selected == "select" ? Colors.purple[200] : Colors.purple[50]),
             child: const Icon(Icons.ads_click),
           ),
           ElevatedButton(
             onPressed: () => _line(context),
+            style: ElevatedButton.styleFrom(backgroundColor: selected == "line" ? Colors.purple[200] : Colors.purple[50]),
             child: const Icon(Icons.edit),
           ),
           ElevatedButton(
             onPressed: () => _stroke(context),
+            style: ElevatedButton.styleFrom(backgroundColor: selected == "stroke" ? Colors.purple[200] : Colors.purple[50]),
             child: const Icon(Icons.brush),
           ),
           ElevatedButton(
             onPressed: () => _erase(context),
             child: const Icon(Icons.auto_fix_normal),
+            style: ElevatedButton.styleFrom(backgroundColor: selected == "erase" ? Colors.purple[200] : Colors.purple[50]),
           ),
           ElevatedButton(
             onPressed: () => _box(context),
             child: const Icon(Icons.rectangle_outlined),
+            style: ElevatedButton.styleFrom(backgroundColor: selected == "box" ? Colors.purple[200] : Colors.purple[50]),
           ),
           // ElevatedButton(
           //   onPressed: onDraw,
@@ -102,25 +111,40 @@ class ControlPanelWidget extends StatelessWidget {
   void _line(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.line;
+    setState(() {
+      selected = "line";
+    });
   }
 
   void _stroke(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.stroke;
+    setState(() {
+      selected = "stroke";
+    });
   }
 
   void _erase(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.erase;
+    setState(() {
+      selected = "erase";
+    });
   }
 
   void _box(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.box;
+    setState(() {
+      selected = "box";
+    });
   }
 
   void _cursor(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.select;
+    setState(() {
+      selected = "select";
+    });
   }
 }

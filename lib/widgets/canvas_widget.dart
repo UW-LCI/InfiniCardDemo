@@ -170,15 +170,6 @@ class CanvasWidgetState extends State<CanvasWidget> {
           if(entry != newEntry){
             Overlay.of(context).insert(newEntry);
           }
-          // debugPrint("***");
-          // BoxAction? clicked = inBounds(action, infinicardProvider);
-          // debugPrint(clicked.toString());
-          // if(clicked!=null){
-          //   infinicardProvider.toolSelected == Tools.select;
-          //   SelectBoxAction selectedAction = SelectBoxAction(clicked.point1, clicked.point1, clicked.point1);
-          //   selectedAction.selected = clicked;
-          //   infinicardProvider.pendingAction = selectedAction;
-          //   debugPrint("clicked");
             return;
         }
           
