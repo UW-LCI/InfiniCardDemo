@@ -17,7 +17,6 @@ class ControlPanelWidget extends StatefulWidget {
 }
 
 class ControlPanelWidgetState extends State<ControlPanelWidget> {
-  String selected = "";
 
   @override
   void initState() {
@@ -26,55 +25,59 @@ class ControlPanelWidgetState extends State<ControlPanelWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
+
     return Container(
       padding: const EdgeInsets.all(5.0),
+      width: 50,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ElevatedButton(
             onPressed: () => _clear(context),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.delete),
           ),
           ElevatedButton(
             onPressed: widget.onRecognize,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.lightbulb),
           ),
           ElevatedButton(
             onPressed: () => _undo(context),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.undo),
           ),
           ElevatedButton(
             onPressed: () => _redo(context),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.redo),
           ),
           ElevatedButton(
             onPressed: () => _cursor(context),
-            style: ElevatedButton.styleFrom(backgroundColor: selected == "select" ? Colors.purple[200] : Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.select ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.ads_click),
           ),
           ElevatedButton(
             onPressed: () => _line(context),
-            style: ElevatedButton.styleFrom(backgroundColor: selected == "line" ? Colors.purple[200] : Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.line ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.edit),
           ),
           ElevatedButton(
             onPressed: () => _stroke(context),
-            style: ElevatedButton.styleFrom(backgroundColor: selected == "stroke" ? Colors.purple[200] : Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.stroke ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
             child: const Icon(Icons.brush),
           ),
           ElevatedButton(
             onPressed: () => _erase(context),
             child: const Icon(Icons.auto_fix_normal),
-            style: ElevatedButton.styleFrom(backgroundColor: selected == "erase" ? Colors.purple[200] : Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.erase ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
           ),
           ElevatedButton(
             onPressed: () => _box(context),
             child: const Icon(Icons.rectangle_outlined),
-            style: ElevatedButton.styleFrom(backgroundColor: selected == "box" ? Colors.purple[200] : Colors.purple[50]),
+            style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.box ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
           ),
           // ElevatedButton(
           //   onPressed: onDraw,
@@ -111,40 +114,25 @@ class ControlPanelWidgetState extends State<ControlPanelWidget> {
   void _line(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.line;
-    setState(() {
-      selected = "line";
-    });
   }
 
   void _stroke(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.stroke;
-    setState(() {
-      selected = "stroke";
-    });
   }
 
   void _erase(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.erase;
-    setState(() {
-      selected = "erase";
-    });
   }
 
   void _box(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.box;
-    setState(() {
-      selected = "box";
-    });
   }
 
   void _cursor(BuildContext context){
     final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
     provider.toolSelected = Tools.select;
-    setState(() {
-      selected = "select";
-    });
   }
 }

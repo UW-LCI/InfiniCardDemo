@@ -173,7 +173,6 @@ class CanvasWidgetState extends State<CanvasWidget> {
             return;
         }
           
-        
         action.rect = box;
 
         List<Rect> containedStrokes = strokesWithin(action, infinicardProvider);
@@ -204,11 +203,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
         if(entry.mounted){
           entry.remove();
         }
-        infinicardProvider.entry = OverlayEntry(
-          builder: (context) => Positioned(
-              top: action.point2.y,
-              left: action.point2.x,
-              child: SizedBox(width: 200, height: 100, child: infinicardProvider.dropdown)));
+        infinicardProvider.entry = infinicardProvider.getOverlay(infinicardProvider.dropdown, action);
         OverlayEntry newEntry = infinicardProvider.entry;
         if(entry != newEntry){
           Overlay.of(context).insert(newEntry);

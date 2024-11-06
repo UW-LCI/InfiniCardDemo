@@ -7,6 +7,7 @@ import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
+import 'package:infinicard_v1/models/draw_actions/delete_action.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
@@ -43,7 +44,7 @@ class InfinicardStateProvider extends ChangeNotifier {
     const DropdownMenuEntry(value: 'bar', label: 'bar'),
     const DropdownMenuEntry(value: 'icon', label: 'icon')
   ];
-  DropdownMenu? dropdown;
+  DropdownMenu dropdown = DropdownMenu(dropdownMenuEntries: []);
 
   OverlayEntry entry = OverlayEntry(builder: (BuildContext context) {
     return SizedBox(width: 1, height: 0, child: const Text("HELLO"));
@@ -57,8 +58,8 @@ class InfinicardStateProvider extends ChangeNotifier {
     return DropdownMenu(
       dropdownMenuEntries: element,
       initialSelection: label,
-      menuStyle:
-          const MenuStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
+      menuStyle: const MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(Colors.white)),
       inputDecorationTheme:
           InputDecorationTheme(filled: true, fillColor: Colors.lightBlue[50]),
       onSelected: (value) {
@@ -74,6 +75,30 @@ class InfinicardStateProvider extends ChangeNotifier {
         _clearOverlay();
       },
     );
+  }
+
+  OverlayEntry getOverlay(DropdownMenu dropdown, BoxAction boxAction) {
+    IconButton deleteBox = IconButton(
+        onPressed: () {
+          List<DrawAction> strokes = boxAction.strokes;
+          for(DrawAction stroke in strokes){
+            _pastActions.removeWhere((item)=>item==stroke);
+          }
+          _pastActions.removeWhere((item)=>item==boxAction);
+          _pastActions.add(DeleteAction(boxAction));
+          if(this.entry.mounted){
+            this.entry.remove();
+          }
+          updateSource(compileDrawing(getActiveActions()));
+          _invalidateAndNotify();
+        },
+        icon: const Icon(Icons.delete));
+    OverlayEntry entry = OverlayEntry(
+        builder: (context) => Positioned(
+            top: boxAction.rect.top - 30,
+            right: width - boxAction.rect.right - 30,
+            child: SizedBox(width: 250, height: 100, child: Row(children:[dropdown, deleteBox]))));
+    return entry;
   }
 
   //Draw Methods
@@ -159,6 +184,15 @@ class InfinicardStateProvider extends ChangeNotifier {
         for (DrawAction each in action.erased) {
           _pastActions.add(each);
         }
+      } else if(action is DeleteAction){
+        if(action.deleted is BoxAction){
+          BoxAction deletedAction = action.deleted as BoxAction;
+          List<DrawAction> strokes = deletedAction.strokes;
+          for(DrawAction stroke in strokes){
+            _pastActions.add(stroke);
+          }
+          _pastActions.add(deletedAction);
+        }
       }
       _futureActions.add(action);
     }
@@ -173,6 +207,16 @@ class InfinicardStateProvider extends ChangeNotifier {
       if (action is EraseAction) {
         for (DrawAction each in action.erased) {
           _pastActions.removeWhere((item) => item == each);
+        }
+      } else if(action is DeleteAction){
+        DrawAction deleted = action.deleted;
+        if(deleted is BoxAction){
+          BoxAction deletedAction = action.deleted as BoxAction;
+          List<DrawAction> strokes = deletedAction.strokes;
+          for(DrawAction stroke in strokes){
+            _pastActions.removeWhere((item)=>item==stroke);
+          }
+          _pastActions.removeWhere((item)=>item==deletedAction);
         }
       }
       _pastActions.add(action);
@@ -258,27 +302,24 @@ class InfinicardStateProvider extends ChangeNotifier {
           if (intersecting > 0) {
             eraseAction.erased.add(strokeAction);
             _pastActions.removeWhere((item) => item == strokeAction);
-            if(strokeAction.box!=null){
+            if (strokeAction.box != null) {
               //find all other strokes in rhe box
               BoxAction currentBox = strokeAction.box!;
-              currentBox.strokes.removeWhere((item)=> item == strokeAction);
-              if(currentBox.strokes.length == 0){
+              currentBox.strokes.removeWhere((item) => item == strokeAction);
+              if (currentBox.strokes.length == 0) {
                 _pastActions.removeWhere((item) => item == currentBox);
               } else {
                 List<Rect> elements = [];
-                for(DrawAction stroke in currentBox.strokes){
-                  if(stroke is StrokeAction){
+                for (DrawAction stroke in currentBox.strokes) {
+                  if (stroke is StrokeAction) {
                     elements.add(stroke.strokePath.getBounds());
-                  } else if(stroke is LineAction){
+                  } else if (stroke is LineAction) {
                     elements.add(stroke.linePath.getBounds());
                   }
-                  
                 }
                 currentBox.rect = combineRect(elements);
                 updateSource(compileDrawing(getActiveActions()));
-                
               }
-              
             }
           }
           break;
@@ -303,7 +344,7 @@ class InfinicardStateProvider extends ChangeNotifier {
           if (intersecting > 0) {
             eraseAction.erased.add(lineAction);
             _pastActions.removeWhere((item) => item == lineAction);
-            if(lineAction.box!=null){
+            if (lineAction.box != null) {
               _pastActions.removeWhere((item) => item == lineAction.box);
             }
           }
@@ -315,15 +356,15 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
   }
 
-  Rect combineRect(List<Rect> elements){
+  Rect combineRect(List<Rect> elements) {
     Rect box = Rect.zero;
-    if(elements.length>1){
+    if (elements.length > 1) {
       box = elements[0];
-      for(int i=1; i<elements.length; i++){
+      for (int i = 1; i < elements.length; i++) {
         box = box.expandToInclude(elements[i]);
       }
       box = box.inflate(5);
-    } else if(elements.length==1){
+    } else if (elements.length == 1) {
       box = elements[0].inflate(5);
     } else {
       box = Rect.zero;
@@ -332,22 +373,13 @@ class InfinicardStateProvider extends ChangeNotifier {
   }
 
   click(SelectBoxAction selectAction) {
-    List<DrawAction> clickableActions = [];
+    List<DrawAction> clickableActions = getActiveActions();
     List<BoxAction> possibleSelections = [];
-    final futureIndexOfLastClearAction =
-        _pastActions.lastIndexWhere((element) => element is ClearAction);
-    if (futureIndexOfLastClearAction == -1) {
-      // never been cleared
-      clickableActions = _pastActions;
-    } else {
-      clickableActions = _pastActions
-          .getRange(futureIndexOfLastClearAction, _pastActions.length)
-          .toList();
-    }
+
     selectedAction = NullAction();
     for (DrawAction action in clickableActions) {
       if (action is BoxAction) {
-        Rect box = action.rect;
+        Rect box = action.rect.inflate(5);
         if (box.contains(Offset(selectAction.point.x, selectAction.point.y))) {
           possibleSelections.add(action);
         }
@@ -357,11 +389,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       selectedAction = possibleSelections[0];
       dropdown =
           initDropdown(dropdownElements, possibleSelections[0].elementName);
-      entry = OverlayEntry(
-          builder: (context) => Positioned(
-              top: selectAction.point.y,
-              left: selectAction.point.x,
-              child: SizedBox(width: 200, height: 100, child: dropdown)));
+      entry = getOverlay(dropdown, possibleSelections[0]);
     } else if (possibleSelections.length > 1) {
       Size smallest = possibleSelections[0].rect.size;
       BoxAction current = possibleSelections[0];
@@ -374,15 +402,9 @@ class InfinicardStateProvider extends ChangeNotifier {
       }
       selectedAction = current;
       dropdown = initDropdown(dropdownElements, current.elementName);
-      entry = OverlayEntry(
-          builder: (context) => Positioned(
-              top: selectAction.point.y,
-              left: selectAction.point.x,
-              child: SizedBox(width: 200, height: 100, child: dropdown)));
+      entry = getOverlay(dropdown, current);
     }
   }
-
-  
 
   BoxAction? clickedBox(SelectBoxAction selectAction) {
     List<DrawAction> clickableActions = [];
@@ -410,8 +432,9 @@ class InfinicardStateProvider extends ChangeNotifier {
         if (box.contains(Offset(selectAction.point.x, selectAction.point.y))) {
           possibleSelections.add(action);
         } else {
-          for(Rect point in touchPoints){
-            if (point.contains(Offset(selectAction.point.x, selectAction.point.y))) {
+          for (Rect point in touchPoints) {
+            if (point
+                .contains(Offset(selectAction.point.x, selectAction.point.y))) {
               possibleSelections.add(action);
             }
           }
@@ -471,19 +494,19 @@ class InfinicardStateProvider extends ChangeNotifier {
       Offset point = Offset(clickAction.point.x, clickAction.point.y);
       Rect oldBox = action.rect;
       action.rect = Rect.fromPoints(clickAction.anchor!, point);
-      for(DrawAction stroke in strokes){
+      for (DrawAction stroke in strokes) {
         final Matrix4 matrix = Matrix4.identity();
         double scaleX = action.rect.width / oldBox.width;
         double scaleY = action.rect.height / oldBox.height;
-        if(stroke is StrokeAction){
-          if(stroke.box == action){
+        if (stroke is StrokeAction) {
+          if (stroke.box == action) {
             matrix.translate(action.rect.center.dx, action.rect.center.dy);
             matrix.scale(scaleX, scaleY);
             matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
             stroke.strokePath = stroke.strokePath.transform(matrix.storage);
           }
-        } else if(stroke is LineAction){
-          if(stroke.box == action){
+        } else if (stroke is LineAction) {
+          if (stroke.box == action) {
             matrix.translate(action.rect.center.dx, action.rect.center.dy);
             matrix.scale(scaleX, scaleY);
             matrix.translate(-oldBox.center.dx, -oldBox.center.dy);
@@ -491,22 +514,22 @@ class InfinicardStateProvider extends ChangeNotifier {
           }
         }
       }
-
-    } else if (clickAction.selected!=null){
+    } else if (clickAction.selected != null) {
       //moving
       BoxAction action = clickAction.selected as BoxAction;
       List<DrawAction> strokes = innerStrokes(action);
       Offset point = Offset(clickAction.point.x, clickAction.point.y);
-      Offset previous = Offset(clickAction.prevPoint.x, clickAction.prevPoint.y);
+      Offset previous =
+          Offset(clickAction.prevPoint.x, clickAction.prevPoint.y);
       Offset shift = point - previous;
       action.rect = action.rect.shift(shift);
-      for(DrawAction stroke in strokes){
-        if(stroke is StrokeAction){
-          if(stroke.box == action){
+      for (DrawAction stroke in strokes) {
+        if (stroke is StrokeAction) {
+          if (stroke.box == action) {
             stroke.strokePath = stroke.strokePath.shift(shift);
           }
-        } else if(stroke is LineAction){
-          if(stroke.box == action){
+        } else if (stroke is LineAction) {
+          if (stroke.box == action) {
             stroke.linePath = stroke.linePath.shift(shift);
           }
         }
@@ -515,16 +538,16 @@ class InfinicardStateProvider extends ChangeNotifier {
     updateSource(compileDrawing(getActiveActions()));
   }
 
-  List<DrawAction> innerStrokes(BoxAction box){
+  List<DrawAction> innerStrokes(BoxAction box) {
     List<DrawAction> actions = getActiveActions();
     List<DrawAction> elements = [];
-    for(DrawAction action in actions){
-      if(action is StrokeAction){
-        if(contained(box, action)){
+    for (DrawAction action in actions) {
+      if (action is StrokeAction) {
+        if (contained(box, action)) {
           elements.add(action);
         }
-      } else if(action is LineAction){
-        if(contained(box, action)){
+      } else if (action is LineAction) {
+        if (contained(box, action)) {
           elements.add(action);
         }
       }
