@@ -60,8 +60,12 @@ class InfinicardStateProvider extends ChangeNotifier {
       initialSelection: label,
       menuStyle: const MenuStyle(
           backgroundColor: WidgetStatePropertyAll(Colors.white)),
-      inputDecorationTheme:
-          InputDecorationTheme(filled: true, fillColor: Colors.lightBlue[50]),
+      inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(30.0)),
+              borderSide: BorderSide(color: Colors.grey.shade700))),
       onSelected: (value) {
         if (selectedAction is BoxAction) {
           BoxAction action = selectedAction as BoxAction;
@@ -81,23 +85,52 @@ class InfinicardStateProvider extends ChangeNotifier {
     IconButton deleteBox = IconButton(
         onPressed: () {
           List<DrawAction> strokes = boxAction.strokes;
-          for(DrawAction stroke in strokes){
-            _pastActions.removeWhere((item)=>item==stroke);
+          for (DrawAction stroke in strokes) {
+            _pastActions.removeWhere((item) => item == stroke);
           }
-          _pastActions.removeWhere((item)=>item==boxAction);
+          _pastActions.removeWhere((item) => item == boxAction);
           _pastActions.add(DeleteAction(boxAction));
-          if(this.entry.mounted){
+          if (this.entry.mounted) {
             this.entry.remove();
           }
           updateSource(compileDrawing(getActiveActions()));
           _invalidateAndNotify();
         },
         icon: const Icon(Icons.delete));
+    IconButton duplicateBox = IconButton(
+        onPressed: () {
+          double offset = 10.0;
+          List<DrawAction> strokes = boxAction.strokes;
+          BoxAction newBox = BoxAction(boxAction.point1, boxAction.point2);
+          newBox.rect = boxAction.rect.shift(Offset(offset,offset));
+          newBox.elementName = boxAction.elementName;
+          for (DrawAction stroke in strokes) {
+            if(stroke is StrokeAction){
+              Path newPath = stroke.strokePath.shift(Offset(offset,offset));
+              StrokeAction newStroke = StrokeAction(stroke.points);
+              newStroke.strokePath = newPath;
+              newStroke.box = newBox;
+              newBox.strokes.add(newStroke);
+              _pastActions.add(newStroke);
+            }
+          }
+          _pastActions.add(newBox);
+          selectedAction = newBox;
+          if (this.entry.mounted) {
+            this.entry.remove();
+          }
+          updateSource(compileDrawing(getActiveActions()));
+          _invalidateAndNotify();
+        },
+        icon: const Icon(Icons.copy));
     OverlayEntry entry = OverlayEntry(
         builder: (context) => Positioned(
             top: boxAction.rect.top - 30,
             right: width - boxAction.rect.right - 30,
-            child: SizedBox(width: 250, height: 100, child: Row(children:[dropdown, deleteBox]))));
+            child: SizedBox(
+                width: 250,
+                height: 100,
+                child: Row(children: [dropdown, duplicateBox, deleteBox]))));
     return entry;
   }
 
@@ -184,11 +217,11 @@ class InfinicardStateProvider extends ChangeNotifier {
         for (DrawAction each in action.erased) {
           _pastActions.add(each);
         }
-      } else if(action is DeleteAction){
-        if(action.deleted is BoxAction){
+      } else if (action is DeleteAction) {
+        if (action.deleted is BoxAction) {
           BoxAction deletedAction = action.deleted as BoxAction;
           List<DrawAction> strokes = deletedAction.strokes;
-          for(DrawAction stroke in strokes){
+          for (DrawAction stroke in strokes) {
             _pastActions.add(stroke);
           }
           _pastActions.add(deletedAction);
@@ -208,15 +241,15 @@ class InfinicardStateProvider extends ChangeNotifier {
         for (DrawAction each in action.erased) {
           _pastActions.removeWhere((item) => item == each);
         }
-      } else if(action is DeleteAction){
+      } else if (action is DeleteAction) {
         DrawAction deleted = action.deleted;
-        if(deleted is BoxAction){
+        if (deleted is BoxAction) {
           BoxAction deletedAction = action.deleted as BoxAction;
           List<DrawAction> strokes = deletedAction.strokes;
-          for(DrawAction stroke in strokes){
-            _pastActions.removeWhere((item)=>item==stroke);
+          for (DrawAction stroke in strokes) {
+            _pastActions.removeWhere((item) => item == stroke);
           }
-          _pastActions.removeWhere((item)=>item==deletedAction);
+          _pastActions.removeWhere((item) => item == deletedAction);
         }
       }
       _pastActions.add(action);
@@ -395,7 +428,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       BoxAction current = possibleSelections[0];
       for (BoxAction each in possibleSelections) {
         Size boxSize = each.rect.size;
-        if (boxSize < smallest) {
+        if (boxSize <= smallest) {
           current = each;
           smallest = boxSize;
         }
@@ -448,7 +481,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       BoxAction current = possibleSelections[0];
       for (BoxAction each in possibleSelections) {
         Size boxSize = each.rect.size;
-        if (boxSize < smallest) {
+        if (boxSize <= smallest) {
           current = each;
           smallest = boxSize;
         }

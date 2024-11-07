@@ -4,6 +4,7 @@ import 'package:infinicard_v1/models/canvasTheme.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/clear_action.dart';
+import 'package:infinicard_v1/models/draw_actions/delete_action.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
@@ -47,6 +48,8 @@ class CanvasPainter extends CustomPainter {
         case NullAction _:
           break;
         case SelectBoxAction _:
+          break;
+        case DeleteAction _:
           break;
         case ClearAction _:
           canvas.drawRect(rect, clearPaint);
