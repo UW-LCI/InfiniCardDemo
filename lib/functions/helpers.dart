@@ -119,12 +119,15 @@ double? getHeight(XmlElement heightElement){
 double? getDouble(XmlElement numElement){
   final val = numElement.innerText.toString();
   double? number;
-  try{
-    number = double.parse(val.toLowerCase().replaceAll(' ', ''));
-  } on Exception catch(_) {
-    debugPrint("Failed to interpret double value $val");
-    number = null;
+  if(val!=""){
+    try{
+      number = double.parse(val.toLowerCase().replaceAll(' ', ''));
+    } on Exception catch(_) {
+      debugPrint("Failed to interpret double value $val");
+      number = null;
+    }
   }
+  
   return number;
 }
 

@@ -48,6 +48,25 @@ class ICIcon extends ICObject{
   }
 
   @override
+  ICIcon copyWith({int? newID}) {
+    ICIcon newIcon = ICIcon();
+    newIcon.id = newID ?? -1;
+
+    newIcon.icon = icon;
+    newIcon.iconColor = iconColor;
+    newIcon.iconName = iconName;
+    newIcon.iconSize = iconSize;
+
+    newIcon.height = height;
+    newIcon.width = width;
+
+    newIcon.top = top;
+    newIcon.left = left;
+
+    return newIcon;
+  }
+
+  @override
   Widget toFlutter(BuildContext context){
     return Icon(icon, color: iconColor?.toFlutter(), size: iconSize);
   }

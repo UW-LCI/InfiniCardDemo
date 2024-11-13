@@ -47,6 +47,27 @@ class ICColumn extends ICObject{
   }
 
   @override
+  ICColumn copyWith({int? newID}) {
+    ICColumn newColumn = ICColumn([]);
+    newColumn.id = newID ?? -1;
+    for(ICObject child in children){
+      newColumn.children.add(child.copyWith(newID: UniqueKey().hashCode));
+    }
+
+    newColumn.mainAxisAlignment = mainAxisAlignment;
+    newColumn.mainAxisSize = mainAxisSize;
+    newColumn.crossAxisAlignment = crossAxisAlignment;
+
+    newColumn.height = height;
+    newColumn.width = width;
+
+    newColumn.top = top;
+    newColumn.left = left;
+
+    return newColumn;
+  }
+
+  @override
   Widget toFlutter(BuildContext context) {
     var flutterChildren = children.map((child) => child.toFlutter(context)).toList();
     return Column(

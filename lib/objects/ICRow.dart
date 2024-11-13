@@ -47,6 +47,27 @@ class ICRow extends ICObject{
   }
 
   @override
+  ICRow copyWith({int? newID}) {
+    ICRow newRow = ICRow([]);
+    newRow.id = newID ?? -1;
+    for(ICObject child in children){
+      newRow.children.add(child.copyWith(newID: UniqueKey().hashCode));
+    }
+
+    newRow.mainAxisAlignment = mainAxisAlignment;
+    newRow.mainAxisSize = mainAxisSize;
+    newRow.crossAxisAlignment = crossAxisAlignment;
+
+    newRow.height = height;
+    newRow.width = width;
+
+    newRow.top = top;
+    newRow.left = left;
+
+    return newRow;
+  }
+
+  @override
   Widget toFlutter(BuildContext context) {
     List<Widget> flutterChildren = [];
     for(ICObject child in children){

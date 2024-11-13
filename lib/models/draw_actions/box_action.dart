@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:infinicard_v1/models/dollar_q.dart';
+import 'package:infinicard_v1/objects/ICObject.dart';
+import 'package:infinicard_v1/objects/ICText.dart';
+import 'package:infinicard_v1/objects/ICUndefined.dart';
 
 import '../draw_actions.dart';
 
@@ -16,6 +19,8 @@ class BoxAction extends DrawAction {
   List<DrawAction> strokes = [];
 
   Rect rect = Rect.fromPoints(Offset.zero, Offset.zero);
+
+  ICObject element = ICUndefined();
 
   BoxAction(this.point1, this.point2);
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:infinicard_v1/functions/buildUI/buildIcon.dart";
 import "package:infinicard_v1/functions/buildUI/buildIconButton.dart";
+import "package:infinicard_v1/objects/ICUndefined.dart";
 import 'package:xml/xml.dart';
 
 import "buildAppBar.dart";
@@ -30,7 +31,7 @@ Widget buildXML(List<ICObject> uiElements, BuildContext context) {
   //       return Stack(children: uiWidgets);
   //     });
 
-  return Stack(children: uiWidgets);
+  return Stack(children: uiWidgets, alignment: Alignment(-1.0,-1.0),);
 }
 
 List<ICObject> getXML(String xml, BuildContext context) {
@@ -122,6 +123,8 @@ ICObject getUIElement(XmlElement child, BuildContext context) {
     case "column":
       uiElement = getColumn(child, context);
       break;
+    case "undefined":
+      uiElement = ICUndefined();
     default:
       uiElement = ICText("MissingWidget");
       debugPrint("Tried to build unrecognized type: $type");

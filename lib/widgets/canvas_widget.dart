@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
+import 'package:infinicard_v1/functions/compileXML/compileDrawing.dart';
 import 'package:infinicard_v1/functions/helpers.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/erase_action.dart';
@@ -10,6 +11,7 @@ import 'package:infinicard_v1/models/draw_actions/null_action.dart';
 import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/multi_stroke_write.dart';
+import 'package:infinicard_v1/objects/ICObject.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:provider/provider.dart';
 import '../models/multi_stroke_parser.dart';
@@ -198,16 +200,17 @@ class CanvasWidgetState extends State<CanvasWidget> {
         }
         action.strokes = containedStrokeActions;
         
-        infinicardProvider.dropdown = infinicardProvider.initDropdown(infinicardProvider.dropdownElements, null);
         OverlayEntry entry = infinicardProvider.entry;
         if(entry.mounted){
           entry.remove();
         }
-        infinicardProvider.entry = infinicardProvider.getOverlay(infinicardProvider.dropdown, action);
+        infinicardProvider.entry = infinicardProvider.getOverlay(action);
         OverlayEntry newEntry = infinicardProvider.entry;
         if(entry != newEntry){
           Overlay.of(context).insert(newEntry);
         }
+        ICObject element = initElement(action, infinicardProvider.getActiveActions());
+        action.element = element;
         infinicardProvider.add(infinicardProvider.pendingAction);
         
     }

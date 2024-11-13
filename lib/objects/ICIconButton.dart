@@ -59,6 +59,29 @@ class ICIconButton extends ICObject{
   }
 
   @override
+  ICIconButton copyWith({int? newID}) {
+    ICIconButton newButton = ICIconButton();
+    newButton.id = newID ?? -1;
+
+    newButton.action = action!=null ? Map.from(action!) : null;
+
+    newButton.icon = icon.copyWith(newID: UniqueKey().hashCode);
+    newButton.iconSize = iconSize;
+
+    newButton.style = style;
+    newButton.styled = styled;
+
+    newButton.height = height;
+    newButton.width = width;
+
+    newButton.top = top;
+    newButton.left = left;
+
+    return newButton;
+
+  }
+
+  @override
   Widget toFlutter(BuildContext context){
     return IconButton(icon:icon.toFlutter(context), onPressed: () {onPressed(action);}, iconSize: iconSize, style: style.toFlutter(),);
   }

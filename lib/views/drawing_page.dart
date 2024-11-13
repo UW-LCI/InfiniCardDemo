@@ -82,9 +82,6 @@ class _DrawingPageState extends State<DrawingPage> {
         body: Row(
           children: [
             ControlPanelWidget(
-              // onClear: () {
-              //   widget.canvasKey.currentState?.clearCanvas();
-              // },
               onRecognize: () {
                 widget.canvasKey.currentState?.recognizeGesture();
               },

@@ -69,6 +69,36 @@ class ICAppBar extends ICObject{
   }
 
   @override
+  ICAppBar copyWith({int? newID}) {
+    ICAppBar newBar = ICAppBar();
+    newBar.id = newID ?? -1;
+
+    if(actions!=null){
+      newBar.actions = [];
+      for(ICObject action in actions!){
+        newBar.actions!.add(action.copyWith(newID: UniqueKey().hashCode));
+      }
+    }
+
+    newBar.leading = leading;
+    newBar.title = title;
+    newBar.backgroundColor = backgroundColor;
+    newBar.toolbarHeight = toolbarHeight;
+    newBar.centerTitle = centerTitle;
+    newBar.leadingWidth = leadingWidth;
+
+    newBar.height = height;
+    newBar.width = width;
+
+    newBar.top = top;
+    newBar.left = left;
+
+    return newBar;
+    
+  }
+
+
+  @override
   Widget toFlutter(BuildContext context) {
     var flutterActions = actions?.map((action) => action.toFlutter(context)).toList();
     return AppBar(

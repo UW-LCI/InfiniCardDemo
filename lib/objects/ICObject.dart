@@ -8,8 +8,12 @@ abstract class ICObject{
   double? top = 10;
   double? left = 10;
 
+  int id = -1;
+
 
   Widget toFlutter(BuildContext context);
 
   XmlElement toXml({bool verbose=false});
+
+  ICObject copyWith({int? newID});
 }

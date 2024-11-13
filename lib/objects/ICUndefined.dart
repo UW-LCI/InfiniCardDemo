@@ -4,11 +4,7 @@ import 'package:xml/xml.dart';
 import 'package:infinicard_v1/objects/ICTextStyle.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
 
-class ICText extends ICObject{
-  String data = "";
-  ICTextStyle textStyle = ICTextStyle();
-  TextAlign textAlign = TextAlign.left;
-  bool styled = false;
+class ICUndefined extends ICObject{
 
   @override
   double? height = 10;
@@ -20,59 +16,34 @@ class ICText extends ICObject{
   @override
   double? left = 10;
 
+  @override
   int id = -1;
 
-  ICText(this.data);
-
-  void setStyle(ICTextStyle? style) {
-    textStyle = style ?? ICTextStyle();
-    styled = style != null ? true : false;
-  }
-
-  void setAlign(TextAlign align) {
-    textAlign = align;
-  }
-
-  void setSize({double? heightArg, double? widthArg}){
-    height = heightArg;
-    width = widthArg;
-  }
-
-  void setLocation({double? topArg, double? leftArg}){
-    top = topArg;
-    left = leftArg;
-  }
+  ICUndefined();
 
   @override
-  ICText copyWith({int? newID}) {
-    ICText newText = ICText(data);
-    newText.id = newID ?? -1;
+  ICUndefined copyWith({int? newID}) {
+    ICUndefined newUndefined = ICUndefined();
+    newUndefined.id = newID ?? -1;
 
-    newText.textStyle = textStyle;
-    newText.styled = styled;
-    newText.textAlign = textAlign;
+    newUndefined.height = height;
+    newUndefined.width = width;
 
-    newText.height = height;
-    newText.width = width;
+    newUndefined.top = top;
+    newUndefined.left = left;
 
-    newText.top = top;
-    newText.left = left;
-
-    return newText;
+    return newUndefined;
   }
 
   @override
   Widget toFlutter(BuildContext context) { //add toXML function
-    return SizedBox(width: width, height: height, child:FittedBox(child:Text(data, style: textStyle.toFlutter(context: context), textAlign: textAlign)));
+    return SizedBox(width: width, height: height, child:null);
   }
 
   @override
   XmlElement toXml({bool verbose=false}){
-    final element = XmlElement(XmlName('text'),[XmlAttribute(XmlName("id"), id.toString())],[]);
+    final element = XmlElement(XmlName('undefined'),[XmlAttribute(XmlName("id"), id.toString())],[]);
     final propertiesElement = XmlElement(XmlName("properties"));
-
-    final textElement = XmlElement(XmlName("data"),[],[XmlText(data)]);
-    final textStyleElement = textStyle.toXml(verbose: verbose);
 
     final sizeElement = XmlElement(XmlName("size"));
     final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
@@ -82,9 +53,6 @@ class ICText extends ICObject{
     final topElement = (height!= null) ? XmlElement(XmlName("top"), [], [XmlText(top.toString())]) : XmlElement(XmlName("top"), [], [XmlText("")]);
     final leftElement = (width!= null) ? XmlElement(XmlName("left"), [], [XmlText(left.toString())]) : XmlElement(XmlName("left"), [], [XmlText("")]);
 
-    element.children.add(textElement);
-    if(styled){propertiesElement.children.add(textStyleElement);}
-    
     if(verbose==false){
       if(height != null){sizeElement.children.add(heightElement);}
       if(width != null){sizeElement.children.add(widthElement);}

@@ -75,6 +75,25 @@ class ICImage extends ICObject{
     }
   }
 
+  @override
+  ICImage copyWith({int? newID}) {
+    ICImage newImage = ICImage(path);
+    newImage.id = newID ?? -1;
+
+    newImage.semanticLabel = semanticLabel;
+    newImage.shape = shape;
+    newImage.border = border;
+    newImage.shapeDescription = shapeDescription;
+
+    newImage.height = height;
+    newImage.width = width;
+
+    newImage.top = top;
+    newImage.left = left;
+
+    return newImage;
+  }
+
 
   @override
   Widget toFlutter(BuildContext context) {

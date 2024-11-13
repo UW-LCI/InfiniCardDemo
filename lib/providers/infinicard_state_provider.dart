@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_font_picker/flutter_font_picker.dart';
 import 'package:hive/hive.dart';
 import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
 import 'package:infinicard_v1/functions/compileXML/compileDrawing.dart';
@@ -13,6 +14,7 @@ import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/drawing.dart';
+import 'package:infinicard_v1/widgets/overlay_widget.dart';
 
 enum Tools { none, stroke, line, erase, box, select }
 
@@ -34,18 +36,6 @@ class InfinicardStateProvider extends ChangeNotifier {
   final double width;
   final double height;
 
-  final List<DropdownMenuEntry> dropdownElements = [
-    const DropdownMenuEntry(value: 'textButton', label: 'textButton'),
-    const DropdownMenuEntry(value: 'text', label: 'text'),
-    const DropdownMenuEntry(value: 'image', label: 'image'),
-    const DropdownMenuEntry(value: 'row', label: 'row'),
-    const DropdownMenuEntry(value: 'column', label: 'column'),
-    const DropdownMenuEntry(value: 'iconButton', label: 'iconButton'),
-    const DropdownMenuEntry(value: 'bar', label: 'bar'),
-    const DropdownMenuEntry(value: 'icon', label: 'icon')
-  ];
-  DropdownMenu dropdown = DropdownMenu(dropdownMenuEntries: []);
-
   OverlayEntry entry = OverlayEntry(builder: (BuildContext context) {
     return SizedBox(width: 1, height: 0, child: const Text("HELLO"));
   });
@@ -54,83 +44,12 @@ class InfinicardStateProvider extends ChangeNotifier {
       : _pastActions = [],
         _futureActions = [];
 
-  DropdownMenu initDropdown(List<DropdownMenuEntry> element, String? label) {
-    return DropdownMenu(
-      dropdownMenuEntries: element,
-      initialSelection: label,
-      menuStyle: const MenuStyle(
-          backgroundColor: WidgetStatePropertyAll(Colors.white)),
-      inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(30.0)),
-              borderSide: BorderSide(color: Colors.grey.shade700))),
-      onSelected: (value) {
-        if (selectedAction is BoxAction) {
-          BoxAction action = selectedAction as BoxAction;
-          action.elementName = value;
-          updateSource(compileDrawing(getActiveActions()));
-        } else if (_pastActions.last is BoxAction) {
-          BoxAction action = _pastActions.last as BoxAction;
-          action.elementName = value;
-          updateSource(compileDrawing(getActiveActions()));
-        }
-        _clearOverlay();
-      },
-    );
-  }
-
-  OverlayEntry getOverlay(DropdownMenu dropdown, BoxAction boxAction) {
-    IconButton deleteBox = IconButton(
-        onPressed: () {
-          List<DrawAction> strokes = boxAction.strokes;
-          for (DrawAction stroke in strokes) {
-            _pastActions.removeWhere((item) => item == stroke);
-          }
-          _pastActions.removeWhere((item) => item == boxAction);
-          _pastActions.add(DeleteAction(boxAction));
-          if (this.entry.mounted) {
-            this.entry.remove();
-          }
-          updateSource(compileDrawing(getActiveActions()));
-          _invalidateAndNotify();
-        },
-        icon: const Icon(Icons.delete));
-    IconButton duplicateBox = IconButton(
-        onPressed: () {
-          double offset = 10.0;
-          List<DrawAction> strokes = boxAction.strokes;
-          BoxAction newBox = BoxAction(boxAction.point1, boxAction.point2);
-          newBox.rect = boxAction.rect.shift(Offset(offset,offset));
-          newBox.elementName = boxAction.elementName;
-          for (DrawAction stroke in strokes) {
-            if(stroke is StrokeAction){
-              Path newPath = stroke.strokePath.shift(Offset(offset,offset));
-              StrokeAction newStroke = StrokeAction(stroke.points);
-              newStroke.strokePath = newPath;
-              newStroke.box = newBox;
-              newBox.strokes.add(newStroke);
-              _pastActions.add(newStroke);
-            }
-          }
-          _pastActions.add(newBox);
-          selectedAction = newBox;
-          if (this.entry.mounted) {
-            this.entry.remove();
-          }
-          updateSource(compileDrawing(getActiveActions()));
-          _invalidateAndNotify();
-        },
-        icon: const Icon(Icons.copy));
+  OverlayEntry getOverlay(BoxAction boxAction) {
     OverlayEntry entry = OverlayEntry(
         builder: (context) => Positioned(
-            top: boxAction.rect.top - 30,
-            right: width - boxAction.rect.right - 30,
-            child: SizedBox(
-                width: 250,
-                height: 100,
-                child: Row(children: [dropdown, duplicateBox, deleteBox]))));
+            top: boxAction.rect.top,
+            left: boxAction.rect.right - 180,
+            child: OverlayWidget(boxAction)));
     return entry;
   }
 
@@ -263,6 +182,56 @@ class InfinicardStateProvider extends ChangeNotifier {
     _clearOverlay();
     updateSource(compileDrawing(getActiveActions()));
     _invalidateAndNotify();
+  }
+
+  delete(BoxAction boxAction){
+    List<DrawAction> strokes = boxAction.strokes;
+    for (DrawAction stroke in strokes) {
+      _pastActions.removeWhere((item) => item == stroke);
+    }
+    _pastActions.removeWhere((item) => item == boxAction);
+    _pastActions.add(DeleteAction(boxAction));
+    if (entry.mounted) {
+      entry.remove();
+    }
+    updateSource(compileDrawing(getActiveActions()));
+    _invalidateAndNotify();
+  }
+
+  duplicate(BoxAction boxAction){
+    double offset = 10.0;
+    List<DrawAction> strokes = boxAction.strokes;
+    debugPrint(boxAction.uniqueID.toString());
+    BoxAction newBox = BoxAction(boxAction.point1, boxAction.point2);
+    debugPrint(newBox.uniqueID.toString());
+    newBox.rect = boxAction.rect.shift(Offset(offset, offset));
+    newBox.elementName = boxAction.elementName;
+    for (DrawAction stroke in strokes) {
+      if (stroke is StrokeAction) {
+        Path newPath = stroke.strokePath.shift(Offset(offset, offset));
+        StrokeAction newStroke = StrokeAction(stroke.points);
+        newStroke.strokePath = newPath;
+        newStroke.box = newBox;
+        newBox.strokes.add(newStroke);
+        _pastActions.add(newStroke);
+      }
+    }
+    newBox.element = boxAction.element.copyWith(newID:newBox.uniqueID);
+    _pastActions.add(newBox);
+    selectedAction = newBox;
+    if (entry.mounted) {
+      entry.remove();
+    }
+    updateSource(compileDrawing(getActiveActions()));
+    _invalidateAndNotify();
+  }
+
+  updateDropdown(String value, BoxAction action){
+    action.elementName = value;
+    action.element.id = action.uniqueID;
+    action.element = initElement(action, getActiveActions());
+    updateSource(compileDrawing(getActiveActions()));
+    _clearOverlay();
   }
 
   int intersect(double x1, double y1, double x2, double y2, double x3,
@@ -420,9 +389,7 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
     if (possibleSelections.length == 1) {
       selectedAction = possibleSelections[0];
-      dropdown =
-          initDropdown(dropdownElements, possibleSelections[0].elementName);
-      entry = getOverlay(dropdown, possibleSelections[0]);
+      entry = getOverlay(possibleSelections[0]);
     } else if (possibleSelections.length > 1) {
       Size smallest = possibleSelections[0].rect.size;
       BoxAction current = possibleSelections[0];
@@ -434,8 +401,7 @@ class InfinicardStateProvider extends ChangeNotifier {
         }
       }
       selectedAction = current;
-      dropdown = initDropdown(dropdownElements, current.elementName);
-      entry = getOverlay(dropdown, current);
+      entry = getOverlay(current);
     }
   }
 

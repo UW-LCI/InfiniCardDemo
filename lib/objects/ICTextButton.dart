@@ -56,6 +56,26 @@ class ICTextButton extends ICObject{
   }
 
   @override
+  ICTextButton copyWith({int? newID}){
+    ICTextButton newButton = ICTextButton();
+    newButton.id = newID ?? -1;
+
+    newButton.action = action!=null ? Map.from(action!) : null;
+
+    newButton.height = height;
+    newButton.width = width;
+
+    newButton.top = top;
+    newButton.left = left;
+
+    newButton.child = child.copyWith(newID: UniqueKey().hashCode);
+    newButton.style = style;
+    newButton.styled = styled;
+
+    return newButton;
+  }
+
+  @override
   Widget toFlutter(BuildContext context){
     return TextButton(onPressed: () {onPressed(action);}, style: style.toFlutter(), child: child.toFlutter(context));
   }
