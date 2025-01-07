@@ -144,6 +144,8 @@ ICObject compileElement(
       if(title != null){
         bar.setTitle(title);
       }
+      bar.setSize(heightArg: action.rect.height, widthArg: action.rect.width);
+      bar.setLocation(leftArg: action.rect.topLeft.dx, topArg: action.rect.topLeft.dy);
       element = bar;
       break;
     default:

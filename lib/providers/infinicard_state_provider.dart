@@ -36,6 +36,8 @@ class InfinicardStateProvider extends ChangeNotifier {
   final double width;
   final double height;
 
+  bool styleVisibility = false;
+
   OverlayEntry entry = OverlayEntry(builder: (BuildContext context) {
     return SizedBox(width: 1, height: 0, child: const Text("HELLO"));
   });
@@ -227,11 +229,14 @@ class InfinicardStateProvider extends ChangeNotifier {
   }
 
   updateDropdown(String value, BoxAction action){
-    action.elementName = value;
-    action.element.id = action.uniqueID;
-    action.element = initElement(action, getActiveActions());
-    updateSource(compileDrawing(getActiveActions()));
-    _clearOverlay();
+    if(value != action.elementName){
+      action.elementName = value;
+      action.element.id = action.uniqueID;
+      action.element = initElement(action, getActiveActions());
+      styleVisibility = false;
+      updateSource(compileDrawing(getActiveActions()));
+    }
+    
   }
 
   int intersect(double x1, double y1, double x2, double y2, double x3,

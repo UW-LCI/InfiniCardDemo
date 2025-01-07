@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:xml/xml.dart';
 
@@ -97,13 +99,21 @@ class ICImage extends ICObject{
 
   @override
   Widget toFlutter(BuildContext context) {
+    ImageProvider<Object> image;
+    if(path == 'upload.png' || path == 'error.png'){
+      image = AssetImage("assets/images/$path");
+      debugPrint(path);
+    } else {
+      debugPrint(path);
+      image = Image.file(File(path)).image;
+    }
     return  Container(
       clipBehavior: Clip.antiAlias,
       width: width,
       height: height,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("assets/images/$path"),
+          image: image,
           fit: BoxFit.cover,
         ),
         shape: shape,

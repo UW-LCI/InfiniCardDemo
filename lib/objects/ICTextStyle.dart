@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xml/xml.dart';
@@ -6,7 +7,7 @@ import 'package:infinicard_v1/objects/ICColor.dart';
 class ICTextStyle{
 
   ICColor? textColor;
-  double? fontSize;
+  double? fontSize = 700;
   FontWeight? fontWeight;
   String? fontFamily;
 
@@ -17,7 +18,8 @@ class ICTextStyle{
   }
 
   void setFontSize(double? fontSizeArg){
-    fontSize = fontSizeArg;
+    // fontSize = fontSizeArg;
+    fontSize = 700;
   }
 
   void setFontWeight(FontWeight? fontWeightArg){
@@ -34,7 +36,7 @@ class ICTextStyle{
     if(fontFamily!=null){
       try{
         fontStyle = GoogleFonts.getFont(fontFamily!);
-      } on Exception catch (e){
+      } on Exception {
         fontStyle = GoogleFonts.getFont("Lato");
         // debugPrint("unrecognized font $fontFamily");
       }

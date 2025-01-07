@@ -27,33 +27,33 @@ FontWeight getFontWeight(XmlElement weightElement){
   var weightName = weightElement.innerText.toString();
   FontWeight weight;
   switch(weightName.toLowerCase()){
-    case "fontweight.w100" || "thin":
-      weight = FontWeight.w100;
-      break;
-    case "fontweight.w200" || "extra-light":
-      weight = FontWeight.w200;
-      break;
-    case "fontweight.w300" || "light":
-      weight = FontWeight.w300;
-      break;
+    // case "fontweight.w100" || "thin":
+    //   weight = FontWeight.w100;
+    //   break;
+    // case "fontweight.w200" || "extra-light":
+    //   weight = FontWeight.w200;
+    //   break;
+    // case "fontweight.w300" || "light":
+    //   weight = FontWeight.w300;
+    //   break;
     case "fontweight.w400" || "normal":
-      weight = FontWeight.w400;
+      weight = FontWeight.normal;
       break;
-    case "fontweight.w500" || "medium":
-      weight = FontWeight.w500;
-      break;
-    case "fontweight.w600" || "semi-bold":
-      weight = FontWeight.w600;
-      break;
+    // case "fontweight.w500" || "medium":
+    //   weight = FontWeight.w500;
+    //   break;
+    // case "fontweight.w600" || "semi-bold":
+    //   weight = FontWeight.w600;
+    //   break;
     case "fontweight.w700" || "bold":
-      weight = FontWeight.w700;
+      weight = FontWeight.bold;
       break;
-    case "fontweight.w800" || "extra-bold":
-      weight = FontWeight.w800;
-      break;
-    case "fontweight.w900" || "black":
-      weight = FontWeight.w900;
-      break;
+    // case "fontweight.w800" || "extra-bold":
+    //   weight = FontWeight.w800;
+    //   break;
+    // case "fontweight.w900" || "black":
+    //   weight = FontWeight.w900;
+    //   break;
     default:
       weight = FontWeight.normal;
   }
@@ -75,9 +75,9 @@ ICTextStyle getTextStyle(XmlElement styleElement){
       case "color": 
         style.color(ICColor(property.innerText));
         break;
-      case "fontSize":
-        style.setFontSize(getFontSize(property));
-        break;
+      // case "fontSize":
+      //   style.setFontSize(getFontSize(property));
+      //   break;
       case "fontWeight":
         style.setFontWeight(getFontWeight(property));
         break;
@@ -169,9 +169,8 @@ String getString(XmlElement? string){
 }
 
 String getImgPath(XmlElement? path){
-  List<String> validImagePaths = ['error.png', 'pendingImage.png', 'upload.png'];
   String value = path != null ? path.innerText.toString() : "";
-  if(validImagePaths.contains(value)){
+  if(value != ""){
     return value;
   } else {
     return "error.png";

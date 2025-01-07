@@ -79,7 +79,8 @@ class _DrawingPageState extends State<DrawingPage> {
       
       return Scaffold(
         appBar: AppBar(title: const Text('Drawing Recognition')),
-        body: Row(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ControlPanelWidget(
               onRecognize: () {

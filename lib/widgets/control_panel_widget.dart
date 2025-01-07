@@ -29,10 +29,10 @@ class ControlPanelWidgetState extends State<ControlPanelWidget> {
 
     return Container(
       padding: const EdgeInsets.all(5.0),
-      width: 50,
-      child: Column(
+      child: Column(children: 
+      [Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ElevatedButton(
             onPressed: () => _clear(context),
@@ -71,28 +71,17 @@ class ControlPanelWidgetState extends State<ControlPanelWidget> {
           ),
           ElevatedButton(
             onPressed: () => _erase(context),
-            child: const Icon(Icons.auto_fix_normal),
             style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.erase ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
+            child: const Icon(Icons.auto_fix_normal),
           ),
           ElevatedButton(
             onPressed: () => _box(context),
-            child: const Icon(Icons.rectangle_outlined),
             style: ElevatedButton.styleFrom(backgroundColor: provider.toolSelected == Tools.box ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
+            child: const Icon(Icons.rectangle_outlined),
           ),
-          // ElevatedButton(
-          //   onPressed: onDraw,
-          //   child: const Icon(Icons.create),
-          // ),
-          // ElevatedButton(
-          //   onPressed: onErase,
-          //   child: const Icon(Icons.auto_fix_normal),
-          // ),
-          // ElevatedButton(
-          //   onPressed: onSave,
-          //   child: const Text('Save'),
-          // ),
         ],
       ),
+      ],)
     );
   }
 

@@ -3,11 +3,12 @@ import 'package:infinicard_v1/fonts.dart';
 import 'package:infinicard_v1/functions/compileXML/compileDrawing.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_font_picker/flutter_font_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:infinicard_v1/objects/ICButtonStyle.dart';
 import 'package:infinicard_v1/objects/ICColor.dart';
 import 'package:infinicard_v1/objects/ICIcon.dart';
+import 'package:infinicard_v1/objects/ICIconButton.dart';
+import 'package:infinicard_v1/objects/ICImage.dart';
 import 'package:infinicard_v1/objects/ICText.dart';
 import 'package:infinicard_v1/objects/ICTextButton.dart';
 import 'package:infinicard_v1/objects/ICTextStyle.dart';
@@ -25,24 +26,14 @@ class StyleWidget extends StatefulWidget {
 
 class _StyleWidgetState extends State<StyleWidget> {    
   Color pickerColor = Colors.white;
-  Color currentColor = Colors.blue;
 
-  //   final List<DropdownMenuEntry> fonts = [
-  //   DropdownMenuEntry(value: "Abril Fatface", label: "Abril Fatface"),
-  //   DropdownMenuEntry(value: "Alegreya Sans", label: "Alegreya Sans"),
-  //   DropdownMenuEntry(value: "Architects Daughter", label: "Architects Daughter"),
-  //   DropdownMenuEntry(value: "Archivo", label: "Archivo"),
-  // ];
-
-  String selectedFont = "lato";
+  String selectedFont = "Lato";
+  String visibleElement = "";
 
   @override
   Widget build(BuildContext context) {
     final provider =
         Provider.of<InfinicardStateProvider>(context, listen: false);
-
-    List<Tab> tabs = [];
-    List<Widget> tabViews = [];
 
     void changeColor(Color color) {
       setState(() => pickerColor = color);
@@ -57,6 +48,11 @@ class _StyleWidgetState extends State<StyleWidget> {
         case "icon":
           ICIcon icon = widget.boxAction.element as ICIcon;
           icon.setColor(ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
+          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          break;
+        case "iconButton":
+          ICIconButton iconButton = widget.boxAction.element as ICIconButton;
+          iconButton.icon.setColor(ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
           provider.updateSource(compileDrawing(provider.getActiveActions()));
           break;
         case "textButton":
@@ -90,8 +86,12 @@ class _StyleWidgetState extends State<StyleWidget> {
           ICTextButton textButton = widget.boxAction.element as ICTextButton;
           ICButtonStyle style = textButton.style;
           style.setBackgroundColor(color:ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
-
-          widget.boxAction.element = textButton;
+          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          break;
+        case "iconButton":
+          ICIconButton iconButton = widget.boxAction.element as ICIconButton;
+          ICButtonStyle style = iconButton.style;
+          style.setBackgroundColor(color:ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
           provider.updateSource(compileDrawing(provider.getActiveActions()));
           break;
       }
@@ -111,6 +111,8 @@ class _StyleWidgetState extends State<StyleWidget> {
 
     void changeFont(String font){
       setState(() => selectedFont = font);
+      debugPrint(selectedFont);
+
       switch(widget.boxAction.elementName){
         case "text":
           ICText text = widget.boxAction.element as ICText;
@@ -129,45 +131,131 @@ class _StyleWidgetState extends State<StyleWidget> {
       }
     }
 
+    void updateWeight(){
+      switch(widget.boxAction.elementName){
+        case "text":
+          ICText text = widget.boxAction.element as ICText;
+          ICTextStyle style = text.textStyle;
+          FontWeight? weight = style.fontWeight;
+          if(weight == FontWeight.w400 || weight==null || weight == FontWeight.normal){
+            weight = FontWeight.bold;
+          } else {
+            weight = FontWeight.normal;
+          }
+          style.setFontWeight(weight);
+          text.setStyle(style);
+          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          break;
+        case "textButton":
+          ICTextButton textButton = widget.boxAction.element as ICTextButton;
+          ICText text = textButton.child;
+          ICTextStyle style = text.textStyle;
+          FontWeight? weight = style.fontWeight;
+          if(weight == FontWeight.w400 || weight==null || weight == FontWeight.normal){
+            weight = FontWeight.bold;
+          } else {
+            weight = FontWeight.normal;
+          }
+          style.setFontWeight(weight);
+          text.setStyle(style);
+          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          break;
+        default:
+          break;
+      }
+    }
+
+    void updateShape(String shape){
+      switch(widget.boxAction.elementName){
+        case "image":
+          ICImage image = widget.boxAction.element as ICImage;
+          image.setShape(shape);
+          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          break;
+      }
+    }
+
     List<DropdownMenuEntry> fonts = fontOptions.map((value){return DropdownMenuEntry(label:value, value:value, labelWidget:Text(value, style: GoogleFonts.getFont(value),));}).toList();
 
-    DropdownMenu fontDropdown = DropdownMenu(dropdownMenuEntries: fonts, onSelected: (value)=>changeFont(value));
+    DropdownMenu fontDropdown = DropdownMenu(dropdownMenuEntries: fonts, initialSelection: selectedFont, onSelected: (value)=>changeFont(value));
+    IconButton bold = IconButton(icon: Icon(Icons.format_bold), onPressed: (){updateWeight();});
+    Container textEditor = Container(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[fontDropdown, bold]));
 
+    IconButton textColor = IconButton(icon: Icon(Icons.format_color_text), onPressed: (){setState((){visibleElement = "colorPicker"; provider.styleVisibility = true;});},);
+    IconButton font = IconButton(icon: Icon(Icons.font_download_outlined), onPressed: (){setState((){visibleElement = "font"; provider.styleVisibility = true;});},);
+    IconButton iconColor = IconButton(icon: Icon(Icons.format_color_fill), onPressed: (){setState((){visibleElement = "colorPicker"; provider.styleVisibility = true;});},);
+    IconButton bgColor = IconButton(icon: Icon(Icons.format_color_fill), onPressed: (){setState((){visibleElement = "bgColorPicker"; provider.styleVisibility = true;});},);
+    
+    IconButton shape = IconButton(icon:Icon(Icons.format_shapes), onPressed: (){setState((){visibleElement = "shape"; provider.styleVisibility = true;});});
+    IconButton rounded = IconButton(icon:Icon(Icons.rounded_corner), onPressed: (){updateShape("roundedrectangle");});
+    IconButton rectangle = IconButton(icon:Icon(Icons.rectangle_outlined), onPressed: (){updateShape("rectangle");});
+    IconButton circle = IconButton(icon:Icon(Icons.circle_outlined), onPressed: (){updateShape("circle");});
+    Row shapeEditor = Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children:[rounded, rectangle, circle]);
+    
+    List<IconButton> options = [];
     switch (widget.boxAction.elementName) {
       case "text":
-        tabs.add(const Tab(icon: Icon(Icons.format_color_text)));
-        tabViews.add(Column(children:[Expanded(child:colorPicker)]));
-        tabs.add(const Tab(icon: Icon(Icons.font_download_outlined)));
-        tabViews.add(SingleChildScrollView(child:fontDropdown),);
+        options.add(textColor);
+        options.add(font);
+
+        ICText text = widget.boxAction.element as ICText;
+        selectedFont = text.textStyle.fontFamily ?? "Lato";
+        Color? color = text.textStyle.textColor != null? text.textStyle.textColor!.toFlutter() : Colors.white;
+        pickerColor = color ?? Colors.white;
         break;
       case "icon":
-        tabs.add(const Tab(icon: Icon(Icons.format_color_fill)));
-        tabViews.add(Column(children:[Expanded(child:colorPicker)]));
+        options.add(iconColor);
+
+        break;
+      case "iconButton":
+        options.add(iconColor);
+        options.add(bgColor);
+
         break;
       case "textButton":
-        tabs.add(const Tab(icon: Icon(Icons.format_color_text)));
-        tabViews.add(Column(children:[Expanded(child:colorPicker)]));
-        tabs.add(const Tab(icon: Icon(Icons.font_download_outlined)));
-        tabViews.add(SingleChildScrollView(child:fontDropdown),);
-        tabs.add(const Tab(icon: Icon(Icons.format_color_fill)));
-        tabViews.add(Column(children:[Expanded(child:bgColorPicker)]));
+        options.add(textColor);
+        options.add(font);
+        options.add(bgColor);
 
+
+        ICTextButton textButton = widget.boxAction.element as ICTextButton;
+        ICText text = textButton.child;
+        selectedFont = text.textStyle.fontFamily ?? "Lato";
+        Color? color = text.textStyle.textColor != null? text.textStyle.textColor!.toFlutter() : Colors.white;
+        pickerColor = color ?? Colors.white;
+        break;
+      case "image":
+        options.add(shape);
+        break;
+      case "bar":
+        visibleElement = "";
         break;
     }
 
-    return Container(
+    Widget element = Text("hi");
+
+    switch(visibleElement){
+      case "colorPicker":
+        element = colorPicker;
+        break;
+      case "font":
+        element = Padding(padding: EdgeInsets.all(10), child:textEditor);
+        break;
+      case "bgColorPicker":
+        element = bgColorPicker;
+        break;
+      case "shape":
+        element = Padding(padding: EdgeInsets.all(10), child:shapeEditor);
+      default:
+        element = Text("hi");
+    }
+
+    return Padding(padding:EdgeInsets.only(top:10), child:Container(
         decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade700)),
-        height: 300,
+            border: Border.all(color: Colors.grey.shade700),
+            borderRadius: BorderRadius.all(Radius.circular(18))),
         width: 200,
-          child: DefaultTabController(
-              length: tabs.length,
-              child:Column(children: [
-                TabBar(tabs: tabs, isScrollable: true),
-                SizedBox(height:250, child:TabBarView(
-                  children: tabViews,
-                ))
-              ])));
+        child: Column(children:[Row(children:options), Visibility(visible: provider.styleVisibility, child: SizedBox(width:200, height:220, child:element))])));
   }
 }
