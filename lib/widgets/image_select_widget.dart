@@ -46,7 +46,7 @@ class _ImageSelectWidgetState extends State<ImageSelectWidget> {
     ICImage image = widget.boxAction.element as ICImage;
     image.path = item.path;
 
-    provider.updateSource(compileDrawing(provider.getActiveActions()));
+    provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
   }
 
   GridView imgGrid(List<FileSystemEntity>? images, InfinicardStateProvider provider){

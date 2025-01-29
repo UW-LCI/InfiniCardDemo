@@ -7,7 +7,7 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 import 'package:infinicard_v1/functions/helpers.dart';
 
 class ICIconButton extends ICObject{
-  Map? action;
+  Map<String?, String?> action = {'type':"", 'target':""};
   ICIcon icon = ICIcon();
 
   ICButtonStyle style = ICButtonStyle();
@@ -29,7 +29,7 @@ class ICIconButton extends ICObject{
 
   ICIconButton();
 
-  void setAction(Map actionArg){
+  void setAction(Map<String?, String?> actionArg){
     action = actionArg;
   }
 
@@ -63,7 +63,7 @@ class ICIconButton extends ICObject{
     ICIconButton newButton = ICIconButton();
     newButton.id = newID ?? -1;
 
-    newButton.action = action!=null ? Map.from(action!) : null;
+    newButton.action = Map.from(action);
 
     newButton.icon = icon.copyWith(newID: UniqueKey().hashCode);
     newButton.iconSize = iconSize;
@@ -83,7 +83,8 @@ class ICIconButton extends ICObject{
 
   @override
   Widget toFlutter(BuildContext context){
-    return IconButton(icon:icon.toFlutter(context), onPressed: () {onPressed(action);}, iconSize: iconSize, style: style.toFlutter(),);
+    return IconButton(icon:icon.toFlutter(context), onPressed: () {onPressed(action, context);}, iconSize: iconSize, style: style.toFlutter(),);
+    // return IconButton(icon:icon.toFlutter(context), onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Text("hi")));}, iconSize: iconSize, style: style.toFlutter(),);
   }
 
   @override
@@ -97,11 +98,11 @@ class ICIconButton extends ICObject{
 
     final pressedElement = XmlElement(XmlName("onPressed"));
   
-    final type = action?["type"];
-    final target = action?["target"];
+    final type = action["type"];
+    final target = action["target"];
 
     final typeElement = type != null ? XmlElement(XmlName("type"),[],[XmlText(type)]) : XmlElement(XmlName("type"),[],[XmlText("")]);
-    final targetElement = type != null ? XmlElement(XmlName("target"),[],[XmlText(target)]) : XmlElement(XmlName("target"),[],[XmlText("")]);
+    final targetElement = target != null ? XmlElement(XmlName("target"),[],[XmlText(target)]) : XmlElement(XmlName("target"),[],[XmlText("")]);
       
     final iconSizeElement = iconSize != null ? XmlElement(XmlName("iconSize"), [], [XmlText(iconSize.toString())]) : XmlElement(XmlName("iconSize"),[],[XmlText("")]);
    
@@ -116,7 +117,7 @@ class ICIconButton extends ICObject{
     final styleElement = style.toXml(verbose:verbose);
 
     if(verbose==false){
-      if(action!=null){
+      if(type!=null && target!=null){
         pressedElement.children.add(typeElement);
         pressedElement.children.add(targetElement);
         propertiesElement.children.add(pressedElement);

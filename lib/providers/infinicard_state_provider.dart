@@ -14,6 +14,8 @@ import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/select_box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/models/drawing.dart';
+import 'package:infinicard_v1/objects/ICIconButton.dart';
+import 'package:infinicard_v1/objects/ICTextButton.dart';
 import 'package:infinicard_v1/widgets/overlay_widget.dart';
 
 enum Tools { none, stroke, line, erase, box, select }
@@ -21,7 +23,12 @@ enum Tools { none, stroke, line, erase, box, select }
 class InfinicardStateProvider extends ChangeNotifier {
   String source = "";
   infinicardApp icApp = infinicardApp("<root></root>");
+  String currentPageName = "home";
+
   Widget widget = const Placeholder();
+
+  List<String> activeViews = ["draw", "render"];
+  String selectedView = "draw";
 
   Tools _toolSelected = Tools.stroke;
 
@@ -53,6 +60,26 @@ class InfinicardStateProvider extends ChangeNotifier {
             left: boxAction.rect.right - 180,
             child: OverlayWidget(boxAction)));
     return entry;
+  }
+
+  void setStartingPage(String newStartPage){
+    icApp.startPageName = newStartPage;
+    updateSource(compileDrawing(getActiveActions(), icApp));
+    _invalidateAndNotify();
+
+  }
+
+  void updateActiveViews(String view, String action){
+    if(action=="open"){
+      if(!activeViews.contains(view)){
+        activeViews.add(view);
+      }
+    } else if (action=="close"){
+      if(activeViews.contains(view)){
+        activeViews.remove(view);
+      }
+    }
+    _invalidateAndNotify();
   }
 
   //Draw Methods
@@ -92,6 +119,20 @@ class InfinicardStateProvider extends ChangeNotifier {
     } else {
       final actions = _pastActions
           .getRange(futureIndexOfLastClearAction, _pastActions.length)
+          .toList();
+      return actions;
+    }
+  }
+
+    List<BoxAction> getActiveBoxActions() {
+    final futureIndexOfLastClearAction =
+        _pastActions.lastIndexWhere((element) => element is ClearAction);
+    if (futureIndexOfLastClearAction == -1) {
+      return _pastActions.whereType<BoxAction>().toList();
+    } else {
+      final actions = _pastActions
+          .getRange(futureIndexOfLastClearAction, _pastActions.length)
+          .whereType<BoxAction>()
           .toList();
       return actions;
     }
@@ -150,7 +191,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       }
       _futureActions.add(action);
     }
-    updateSource(compileDrawing(getActiveActions()));
+    updateSource(compileDrawing(getActiveActions(), icApp));
     _invalidateAndNotify();
   }
 
@@ -174,7 +215,7 @@ class InfinicardStateProvider extends ChangeNotifier {
         }
       }
       _pastActions.add(action);
-      updateSource(compileDrawing(getActiveActions()));
+      updateSource(compileDrawing(getActiveActions(), icApp));
       _invalidateAndNotify();
     }
   }
@@ -182,7 +223,7 @@ class InfinicardStateProvider extends ChangeNotifier {
   clear() {
     add(ClearAction());
     _clearOverlay();
-    updateSource(compileDrawing(getActiveActions()));
+    updateSource(compileDrawing(getActiveActions(), icApp));
     _invalidateAndNotify();
   }
 
@@ -193,10 +234,20 @@ class InfinicardStateProvider extends ChangeNotifier {
     }
     _pastActions.removeWhere((item) => item == boxAction);
     _pastActions.add(DeleteAction(boxAction));
+    // if(boxAction.elementName == "page"){
+    //   for(BoxAction action in getActiveBoxActions()){
+    //     if(action.pageName == boxAction.pageName){
+    //       action.pageName = "home";
+    //     }
+    //   }
+    // }
+    if(boxAction.elementName == "page"){
+      updateSource(compileDrawing(getActiveActions(), icApp));
+    }
     if (entry.mounted) {
       entry.remove();
     }
-    updateSource(compileDrawing(getActiveActions()));
+    updateSource(compileDrawing(getActiveActions(), icApp));
     _invalidateAndNotify();
   }
 
@@ -207,6 +258,7 @@ class InfinicardStateProvider extends ChangeNotifier {
     BoxAction newBox = BoxAction(boxAction.point1, boxAction.point2);
     debugPrint(newBox.uniqueID.toString());
     newBox.rect = boxAction.rect.shift(Offset(offset, offset));
+    // newBox.pageName = boxAction.pageName;
     newBox.elementName = boxAction.elementName;
     for (DrawAction stroke in strokes) {
       if (stroke is StrokeAction) {
@@ -224,20 +276,42 @@ class InfinicardStateProvider extends ChangeNotifier {
     if (entry.mounted) {
       entry.remove();
     }
-    updateSource(compileDrawing(getActiveActions()));
+    updateSource(compileDrawing(getActiveActions(), icApp));
     _invalidateAndNotify();
   }
 
   updateDropdown(String value, BoxAction action){
     if(value != action.elementName){
+      if(action.elementName == "page"){
+        updateSource(compileDrawing(getActiveActions(), icApp));
+      }
       action.elementName = value;
       action.element.id = action.uniqueID;
-      action.element = initElement(action, getActiveActions());
+      action.element = initElement(action, getActiveActions(), icApp);
       styleVisibility = false;
-      updateSource(compileDrawing(getActiveActions()));
     }
-    
+    updateSource(compileDrawing(getActiveActions(), icApp));
   }
+
+    updateSelectPageAction(String target, BoxAction action){
+      switch(action.elementName){
+        case "iconButton":
+            ICIconButton button = action.element as ICIconButton;
+            if(target != button.action['target']){
+              button.action['type'] = "page";
+              button.action['target'] = target;
+            }
+          break;
+        case "textButton":
+            ICTextButton button = action.element as ICTextButton;
+            if(target != button.action['target']){
+              button.action['type'] = "page";
+              button.action['target'] = target;
+            }
+          break;
+      }
+      updateSource(compileDrawing(getActiveActions(), icApp));
+    }
 
   int intersect(double x1, double y1, double x2, double y2, double x3,
       double y3, double x4, double y4) {
@@ -325,7 +399,7 @@ class InfinicardStateProvider extends ChangeNotifier {
                   }
                 }
                 currentBox.rect = combineRect(elements);
-                updateSource(compileDrawing(getActiveActions()));
+                updateSource(compileDrawing(getActiveActions(), icApp));
               }
             }
           }
@@ -539,7 +613,7 @@ class InfinicardStateProvider extends ChangeNotifier {
         }
       }
     }
-    updateSource(compileDrawing(getActiveActions()));
+    updateSource(compileDrawing(getActiveActions(), icApp));
   }
 
   List<DrawAction> innerStrokes(BoxAction box) {
@@ -567,6 +641,7 @@ class InfinicardStateProvider extends ChangeNotifier {
       icApp = newICApp;
       widget = newWidget;
       source = newSource;
+      debugPrint("updatedSource");
       notifyListeners();
     } on Exception {
       // do something with this here

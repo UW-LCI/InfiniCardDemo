@@ -10,6 +10,8 @@ abstract class ICObject{
 
   int id = -1;
 
+  String pageName = "";
+
 
   Widget toFlutter(BuildContext context);
 

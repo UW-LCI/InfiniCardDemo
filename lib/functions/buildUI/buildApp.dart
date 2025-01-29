@@ -2,26 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
 import 'package:infinicard_v1/functions/buildUI/buildTheme.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
+import 'package:infinicard_v1/objects/ICPage.dart';
 import 'package:infinicard_v1/objects/ICThemeData.dart';
 import 'package:xml/xml.dart';
 
 class infinicardApp {
   String xmlString;
   ICThemeData? theme;
-  List<ICObject> widgets = [];
+  Map<String, ICPage> pages = {"home":ICPage(pageName: "home")};
+  String startPageName = "home";
 
   infinicardApp(this.xmlString){
     theme = getTheme(xmlString);
+    startPageName = getStartPage(xmlString);
   }
 
   Widget toFlutter(){
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
     theme: theme?.toFlutter(),
     home: Scaffold(
       body: Builder(
         builder: (context) {
-          widgets = getXML(xmlString, context);
-          return buildXML(widgets, context);
+          pages = getXML(xmlString, context); 
+          ICPage startPage = pages[startPageName] ?? pages["home"]!;
+          return startPage.toFlutter(context);
         },
       ),
     ),
@@ -33,8 +38,12 @@ class infinicardApp {
     var uiElement = XmlElement(XmlName("ui"),[],[XmlText("")]);
     var themeElement = theme != null ? theme!.toXml(verbose: verbose) :XmlElement(XmlName("theme"),[],[XmlText("")]);
 
-    for(var element in widgets){
-      uiElement.children.add(element.toXml(verbose:verbose));
+    if(pages.isNotEmpty){
+      for(ICPage page in pages.values){
+        uiElement.children.add(page.toXml(verbose:verbose));
+      }
+    } else {
+      uiElement.children.add(ICPage().toXml());
     }
     
     rootElement.children.add(uiElement);

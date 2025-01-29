@@ -78,7 +78,6 @@ class _DrawingPageState extends State<DrawingPage> {
         builder: (context, infinicardProvider, unchangingChild) {
       
       return Scaffold(
-        appBar: AppBar(title: const Text('Drawing Recognition')),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

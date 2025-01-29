@@ -11,11 +11,12 @@ class CanvasView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Drawing Recognition App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: CanvasTheme.backgroundColor,
-      ),
+      debugShowCheckedModeBanner: false,
+      // title: 'Drawing Recognition App',
+      // theme: ThemeData(
+      //   primarySwatch: Colors.blue,
+      //   scaffoldBackgroundColor: CanvasTheme.backgroundColor,
+      // ),
       home: DrawingPage(canvasKey: canvasKey),
     );
   }

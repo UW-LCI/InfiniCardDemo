@@ -1,3 +1,4 @@
+import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
 import 'package:infinicard_v1/functions/helpers.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
@@ -9,30 +10,44 @@ import 'package:infinicard_v1/objects/ICIcon.dart';
 import 'package:infinicard_v1/objects/ICIconButton.dart';
 import 'package:infinicard_v1/objects/ICImage.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
+import 'package:infinicard_v1/objects/ICPage.dart';
 import 'package:infinicard_v1/objects/ICRow.dart';
 import 'package:infinicard_v1/objects/ICText.dart';
 import 'package:infinicard_v1/objects/ICTextButton.dart';
 import 'package:infinicard_v1/objects/ICUndefined.dart';
 import 'package:xml/xml.dart';
 
-String compileDrawing(List<DrawAction> canvasActions) {
+String compileDrawing(List<DrawAction> canvasActions, infinicardApp icApp) {
   XmlElement drawingXML = XmlElement(XmlName("root"));
-  XmlElement ui = XmlElement(XmlName("ui"), [], [XmlText("")]);
+  XmlElement ui = XmlElement(XmlName("ui"), [XmlAttribute(XmlName("startPage"), icApp.startPageName)], [XmlText("")]);
 
+  List<ICObject> homeElements = [];
+  
   for (DrawAction action in canvasActions) {
     if (action is BoxAction) {
       if (action.active) {
-        ICObject element = compileElement(action, canvasActions, ui);
-        ui.children.add(element.toXml(verbose: true));
+        if (action.elementName == "page"){
+          ICPage element = compileElement(action, canvasActions, ui, icApp) as ICPage;
+          icApp.pages[element.pageName] = element;
+        }
+        // } else if(action.pageName == "home"){
+        //   homeElements.add(compileElement(action, canvasActions, ui, icApp));
+        // }
       }
     }
   }
+  icApp.pages["home"]?.setElements(homeElements);
+  for(ICPage page in icApp.pages.values){
+    ui.children.add(page.toXml());
+  }
+
   drawingXML.children.add(ui);
+  
   return drawingXML.toXmlString(pretty: true);
 }
 
 ICObject compileElement(
-    BoxAction action, List<DrawAction> canvasActions, XmlElement ui) {
+    BoxAction action, List<DrawAction> canvasActions, XmlElement ui, infinicardApp icApp) {
   ICObject element = ICUndefined();
   switch (action.elementName) {
     case "textButton":
@@ -58,7 +73,7 @@ ICObject compileElement(
       List<BoxAction> childrenActions = getChildren(action, canvasActions);
       List<ICObject> childrenElements = [];
       for (BoxAction child in childrenActions) {
-        childrenElements.add(compileElement(child, canvasActions, ui));
+        childrenElements.add(compileElement(child, canvasActions, ui, icApp));
         child.active = false;
         List<XmlElement> existing = ui
             .findAllElements(child.elementName)
@@ -76,7 +91,7 @@ ICObject compileElement(
       List<BoxAction> childrenActions = getChildren(action, canvasActions);
       List<ICObject> childrenElements = [];
       for (BoxAction child in childrenActions) {
-        childrenElements.add(compileElement(child, canvasActions, ui));
+        childrenElements.add(compileElement(child, canvasActions, ui, icApp));
         child.active = false;
         List<XmlElement> existing = ui
             .findAllElements(child.elementName)
@@ -112,9 +127,9 @@ ICObject compileElement(
         if(child.elementName == 'iconButton' || child.elementName == 'textButton'){
           actionBoxes.add(child);
         } else if(child.elementName == 'text'){
-          title = compileElement(child, canvasActions, ui);
+          title = compileElement(child, canvasActions, ui, icApp);
         } else {
-          leadingElements.add(compileElement(child, canvasActions, ui));
+          leadingElements.add(compileElement(child, canvasActions, ui, icApp));
         }
         child.active = false;
         List<XmlElement> existing = ui
@@ -127,7 +142,7 @@ ICObject compileElement(
       }
       actionBoxes.sort((a, b) => a.rect.left.compareTo(b.rect.left));
       for(BoxAction action in actionBoxes){
-        actions.add(compileElement(action, canvasActions, ui));
+        actions.add(compileElement(action, canvasActions, ui, icApp));
       }
       if(leadingElements.length > 1){
         leadingWidget = ICRow(leadingElements);
@@ -148,6 +163,29 @@ ICObject compileElement(
       bar.setLocation(leftArg: action.rect.topLeft.dx, topArg: action.rect.topLeft.dy);
       element = bar;
       break;
+    case "page":
+      ICPage page = action.element as ICPage;
+      page.setSize(heightArg: action.rect.height, widthArg: action.rect.width);
+      page.setLocation(leftArg: action.rect.topLeft.dx, topArg: action.rect.topLeft.dy);
+      List<BoxAction> childrenActions = getChildren(action, canvasActions);
+      List<ICObject> childrenElements = [];
+      for (BoxAction child in childrenActions) {
+        // child.pageName = page.pageName;
+        childrenElements.add(compileElement(child, canvasActions, ui, icApp));
+        child.active = false;
+        List<XmlElement> existing = ui
+            .findAllElements(child.elementName)
+            .where((tag) => tag.getAttribute('id') == child.uniqueID.toString())
+            .toList();
+        for (XmlElement element in existing) {
+          element.remove();
+        }
+      }
+      page.setElements(childrenElements);
+
+      element = page;
+      icApp.pages[page.pageName] = page;
+      break;
     default:
       element = ICUndefined();
   }
@@ -155,7 +193,7 @@ ICObject compileElement(
 }
 
 ICObject initElement(
-    BoxAction action, List<DrawAction> canvasActions) {
+    BoxAction action, List<DrawAction> canvasActions, infinicardApp icApp) {
   ICObject element = ICUndefined();
   switch (action.elementName) {
     case "textButton":
@@ -234,8 +272,18 @@ ICObject initElement(
       bar.setLocation(
           leftArg: action.rect.topLeft.dx, topArg: action.rect.topLeft.dy);
       bar.setBackgroundColor(ICColor("white"));
-
       element = bar;
+      break;
+    case "page":
+      ICPage page = ICPage();
+      page.pageName = action.uniqueID.toString();
+      page.setSize(heightArg: action.rect.height, widthArg: action.rect.width);
+      page.setLocation(
+          leftArg: action.rect.topLeft.dx, topArg: action.rect.topLeft.dy);
+      
+      icApp.pages[page.pageName] = page;
+      element = page;
+      
       break;
     default:
       element = ICUndefined();

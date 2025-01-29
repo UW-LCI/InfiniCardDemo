@@ -7,7 +7,7 @@ import 'package:infinicard_v1/objects/ICObject.dart';
 import 'package:infinicard_v1/functions/helpers.dart';
 
 class ICTextButton extends ICObject{
-  Map? action;
+  Map<String?, String?> action = {"type":null, "target":null};
   ICText child = ICText("Button");
 
   @override
@@ -27,7 +27,7 @@ class ICTextButton extends ICObject{
 
   ICTextButton();
 
-  void setAction(Map actionArg){
+  void setAction(Map<String?,String?> actionArg){
     action = actionArg;
   }
 
@@ -60,7 +60,7 @@ class ICTextButton extends ICObject{
     ICTextButton newButton = ICTextButton();
     newButton.id = newID ?? -1;
 
-    newButton.action = action!=null ? Map.from(action!) : null;
+    newButton.action = Map.from(action);
 
     newButton.height = height;
     newButton.width = width;
@@ -77,7 +77,7 @@ class ICTextButton extends ICObject{
 
   @override
   Widget toFlutter(BuildContext context){
-    return TextButton(onPressed: () {onPressed(action);}, style: style.toFlutter(), child: child.toFlutter(context));
+    return TextButton(onPressed: () {onPressed(action, context);}, style: style.toFlutter(), child: child.toFlutter(context));
   }
 
   @override
@@ -92,11 +92,11 @@ class ICTextButton extends ICObject{
 
     final pressedElement = XmlElement(XmlName("onPressed"));
   
-    final type = action?["type"];
-    final target = action?["target"];
+    final type = action["type"];
+    final target = action["target"];
 
     final typeElement = type != null ? XmlElement(XmlName("type"),[],[XmlText(type)]) : XmlElement(XmlName("type"),[],[XmlText("")]);
-    final targetElement = type != null ? XmlElement(XmlName("target"),[],[XmlText(target)]) : XmlElement(XmlName("target"),[],[XmlText("")]);
+    final targetElement = target != null ? XmlElement(XmlName("target"),[],[XmlText(target)]) : XmlElement(XmlName("target"),[],[XmlText("")]);
       
     final sizeElement = XmlElement(XmlName("size"));
     final heightElement = (height!= null) ? XmlElement(XmlName("height"), [], [XmlText(height.toString())]) : XmlElement(XmlName("height"), [], [XmlText("")]);
@@ -110,7 +110,7 @@ class ICTextButton extends ICObject{
     final styleElement = style.toXml(verbose:verbose);
 
     if(verbose==false){
-      if(action!=null){
+      if(type!=null && target!=null){
         pressedElement.children.add(typeElement);
         pressedElement.children.add(targetElement);
         propertiesElement.children.add(pressedElement);

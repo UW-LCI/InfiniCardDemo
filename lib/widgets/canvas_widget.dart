@@ -88,11 +88,11 @@ class CanvasWidgetState extends State<CanvasWidget> {
         infinicardProvider.pendingAction = action;
         break;
       case Tools.box:
-        infinicardProvider.pendingAction = BoxAction(
+        BoxAction action = BoxAction(
           _createPoint(event),
-          _createPoint(event,
-          )
+          _createPoint(event,) 
         );
+        infinicardProvider.pendingAction = action;
         OverlayEntry entry = infinicardProvider.entry;
         if(entry.mounted){
           entry.remove();
@@ -209,8 +209,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         if(entry != newEntry){
           Overlay.of(context).insert(newEntry);
         }
-        ICObject element = initElement(action, infinicardProvider.getActiveActions());
+        ICObject element = initElement(action, infinicardProvider.getActiveActions(), infinicardProvider.icApp);
         action.element = element;
+        // action.pageName = infinicardProvider.currentPageName;
         infinicardProvider.add(infinicardProvider.pendingAction);
         
     }
@@ -429,9 +430,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         child: CustomPaint(
           foregroundPainter: CanvasPainter(infinicardProvider),
           child: Scaffold(body: Container(
-            width: infinicardProvider.width,
-            height: infinicardProvider.width,
-            color: Colors.transparent,
+            // width: infinicardProvider.width,
+            // height: infinicardProvider.width,
+            color: Colors.white,
             child:unchangingChild
           ),
           ),

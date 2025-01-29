@@ -57,7 +57,7 @@ class _ImageUploadState extends State<ImageUpload> {
       ICImage image = widget.boxAction.element as ICImage;
       image.path = uploadedImage.path;
 
-      provider.updateSource(compileDrawing(provider.getActiveActions()));
+      provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
 
     } else {
       // User canceled the picker

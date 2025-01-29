@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/views/editor.dart';
 import 'package:provider/provider.dart';
 import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:infinicard_v1/views/split_screen_editor_and_runner.dart';
@@ -16,9 +17,10 @@ class MainApp extends StatelessWidget {
     const drawAreaHeight = 400.00;
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: ChangeNotifierProvider(
         create: (context) => InfinicardStateProvider(width:drawAreaWidth, height:drawAreaHeight),
-        child: const SplitScreenEditorAndRunner(),
+        child: const Editor(),
       ),
     );
   }

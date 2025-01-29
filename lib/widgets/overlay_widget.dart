@@ -6,6 +6,7 @@ import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
 import 'package:infinicard_v1/widgets/image_select_widget.dart';
 import 'package:infinicard_v1/widgets/image_upload.dart';
 import 'package:infinicard_v1/widgets/input_widget.dart';
+import 'package:infinicard_v1/widgets/interaction_widget.dart';
 import 'package:infinicard_v1/widgets/style_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +23,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   bool _offstage = true;
   bool _inputOffstage = true;
   bool _uploadOffstage = true;
+  bool _interactionOffstage = true;
+
   String type = "";
 
   @override
@@ -37,7 +40,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       const DropdownMenuEntry(value: 'column', label: 'column'),
       const DropdownMenuEntry(value: 'iconButton', label: 'iconButton'),
       const DropdownMenuEntry(value: 'bar', label: 'bar'),
-      const DropdownMenuEntry(value: 'icon', label: 'icon')
+      const DropdownMenuEntry(value: 'icon', label: 'icon'),
+      const DropdownMenuEntry(value: 'page', label: 'page')
     ];
 
     Offstage stylePopup =
@@ -49,6 +53,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
     Offstage uploadPopup = Offstage(
         offstage: _uploadOffstage, child: ImageSelectWidget(widget.boxAction));
+
+    Offstage interactionPopup = Offstage(
+        offstage: _interactionOffstage, child: InteractionWidget(widget.boxAction));
 
     DropdownMenu menu = DropdownMenu(
         dropdownMenuEntries: dropdownElements,
@@ -74,6 +81,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _offstage = !_offstage;
             _inputOffstage = true;
             _uploadOffstage = true;
+            _interactionOffstage = true;
+
           });
         },
         icon: Icon(Icons.palette));
@@ -93,6 +102,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _inputOffstage = !_inputOffstage;
             _uploadOffstage = true;
             _offstage = true;
+            _interactionOffstage = true;
           });
         },
         icon: const Icon(Icons.text_snippet_outlined));
@@ -102,9 +112,25 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _uploadOffstage = !_uploadOffstage;
             _inputOffstage = true;
             _offstage = true;
+            _interactionOffstage = true;
           });
         },
         icon: const Icon(Icons.add_photo_alternate_outlined));
+    IconButton interaction = IconButton(
+        onPressed: () {
+          setState(() {
+            _uploadOffstage = true;
+            _inputOffstage = true;
+            _offstage = true;
+            _interactionOffstage = !_interactionOffstage;
+          });
+        },
+        icon: const Icon(Icons.code));
+    IconButton setStartingPage = IconButton(
+            onPressed: () {provider.setStartingPage(widget.boxAction.element.pageName);},
+            style: IconButton.styleFrom(backgroundColor: provider.icApp.startPageName == widget.boxAction.element.pageName ? Colors.purple[200] : Colors.purple[50], padding: EdgeInsets.all(0)),
+            icon: const Icon(Icons.start),
+          );
 
     List<Widget> options = [];
     switch (type) {
@@ -112,13 +138,13 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         options = [menu, styleBox, inputBox, duplicateBox, deleteBox];
         break;
       case "textButton":
-        options = [menu, styleBox, inputBox, duplicateBox, deleteBox];
+        options = [menu, styleBox, inputBox, interaction, duplicateBox, deleteBox];
         break;
       case "icon":
         options = [menu, styleBox, duplicateBox, deleteBox];
         break;
       case "iconButton":
-        options = [menu, styleBox, duplicateBox, deleteBox];
+        options = [menu, styleBox, interaction, duplicateBox, deleteBox];
         break;
       case "image":
         options = [menu, styleBox, imageUploadBox, duplicateBox, deleteBox];
@@ -132,6 +158,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       case "column":
         options = [menu, duplicateBox, deleteBox];
         break;
+      case "page":
+        options = [menu, setStartingPage, inputBox, duplicateBox, deleteBox];
+        break;
       default:
         options = [menu, duplicateBox, deleteBox];
     }
@@ -139,6 +168,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     return Container(
         alignment: Alignment.bottomCenter,
         child:
-            Column(children: [Row(children: options), stylePopup, inputPopup, uploadPopup]));
+            Column(children: [Row(children: options), stylePopup, inputPopup, interactionPopup, uploadPopup]));
   }
 }

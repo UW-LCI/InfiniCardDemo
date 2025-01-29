@@ -43,17 +43,17 @@ class _StyleWidgetState extends State<StyleWidget> {
           ICTextStyle style = ICTextStyle();
           style.textColor = ICColor("0xff${colorToHex(color,enableAlpha:false)}");
           text.setStyle(style);
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         case "icon":
           ICIcon icon = widget.boxAction.element as ICIcon;
           icon.setColor(ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         case "iconButton":
           ICIconButton iconButton = widget.boxAction.element as ICIconButton;
           iconButton.icon.setColor(ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         case "textButton":
           ICTextButton textButton = widget.boxAction.element as ICTextButton;
@@ -62,7 +62,7 @@ class _StyleWidgetState extends State<StyleWidget> {
           style.textColor = ICColor("0xff${colorToHex(color,enableAlpha:false)}");
           text.setStyle(style);
           textButton.child = text;
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
       }
     }
@@ -86,13 +86,13 @@ class _StyleWidgetState extends State<StyleWidget> {
           ICTextButton textButton = widget.boxAction.element as ICTextButton;
           ICButtonStyle style = textButton.style;
           style.setBackgroundColor(color:ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         case "iconButton":
           ICIconButton iconButton = widget.boxAction.element as ICIconButton;
           ICButtonStyle style = iconButton.style;
           style.setBackgroundColor(color:ICColor("0xff${colorToHex(color,enableAlpha:false)}"));
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
       }
     }
@@ -119,14 +119,14 @@ class _StyleWidgetState extends State<StyleWidget> {
           ICTextStyle style = text.textStyle;
           style.setFontFamily(font);
           text.setStyle(style);
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         case "textButton":
           ICTextButton textButton = widget.boxAction.element as ICTextButton;
           ICTextStyle textStyle = textButton.child.textStyle;
           textStyle.setFontFamily(font);
           textButton.child.setStyle(textStyle);
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
 
       }
     }
@@ -144,7 +144,7 @@ class _StyleWidgetState extends State<StyleWidget> {
           }
           style.setFontWeight(weight);
           text.setStyle(style);
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         case "textButton":
           ICTextButton textButton = widget.boxAction.element as ICTextButton;
@@ -158,7 +158,7 @@ class _StyleWidgetState extends State<StyleWidget> {
           }
           style.setFontWeight(weight);
           text.setStyle(style);
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
         default:
           break;
@@ -170,7 +170,7 @@ class _StyleWidgetState extends State<StyleWidget> {
         case "image":
           ICImage image = widget.boxAction.element as ICImage;
           image.setShape(shape);
-          provider.updateSource(compileDrawing(provider.getActiveActions()));
+          provider.updateSource(compileDrawing(provider.getActiveActions(), provider.icApp));
           break;
       }
     }

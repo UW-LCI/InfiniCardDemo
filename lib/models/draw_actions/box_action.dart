@@ -21,6 +21,8 @@ class BoxAction extends DrawAction {
   Rect rect = Rect.fromPoints(Offset.zero, Offset.zero);
 
   ICObject element = ICUndefined();
+  // String pageName = "home";
+
 
   BoxAction(this.point1, this.point2);
 

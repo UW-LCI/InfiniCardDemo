@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:infinicard_v1/functions/buildUI/buildApp.dart';
 import 'package:infinicard_v1/functions/buildUI/buildFromXml.dart';
 import 'package:infinicard_v1/models/draw_actions.dart';
 import 'package:infinicard_v1/models/draw_actions/box_action.dart';
 import 'package:infinicard_v1/models/draw_actions/line_action.dart';
 import 'package:infinicard_v1/models/draw_actions/stroke_action.dart';
 import 'package:infinicard_v1/objects/ICColor.dart';
+import 'package:infinicard_v1/providers/infinicard_state_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:xml/xml.dart';
 import 'package:infinicard_v1/objects/ICTextStyle.dart';
 import 'package:infinicard_v1/objects/ICObject.dart';
 
-
-double? getFontSize(XmlElement sizeElement){
+double? getFontSize(XmlElement sizeElement) {
   final sizeVal = sizeElement.innerText.toString();
   double? size;
-  try{
+  try {
     size = double.parse(sizeVal.toLowerCase().replaceAll(' ', ''));
   } on Exception {
     debugPrint("Failed to interpret double value $sizeVal");
@@ -23,10 +25,10 @@ double? getFontSize(XmlElement sizeElement){
   return size;
 }
 
-FontWeight getFontWeight(XmlElement weightElement){
+FontWeight getFontWeight(XmlElement weightElement) {
   var weightName = weightElement.innerText.toString();
   FontWeight weight;
-  switch(weightName.toLowerCase()){
+  switch (weightName.toLowerCase()) {
     // case "fontweight.w100" || "thin":
     //   weight = FontWeight.w100;
     //   break;
@@ -60,19 +62,18 @@ FontWeight getFontWeight(XmlElement weightElement){
   return weight;
 }
 
-String getFontFamily(XmlElement fontElement){
+String getFontFamily(XmlElement fontElement) {
   var fontFamily = fontElement.innerText.toString();
   return fontFamily;
 }
 
-
-ICTextStyle getTextStyle(XmlElement styleElement){
+ICTextStyle getTextStyle(XmlElement styleElement) {
   var style = ICTextStyle();
   var properties = styleElement.childElements;
-  for(var property in properties){
+  for (var property in properties) {
     var type = property.name.toString();
-    switch(type){
-      case "color": 
+    switch (type) {
+      case "color":
         style.color(ICColor(property.innerText));
         break;
       // case "fontSize":
@@ -91,96 +92,96 @@ ICTextStyle getTextStyle(XmlElement styleElement){
   return style;
 }
 
-bool? getCenter(XmlElement centerElement){
+bool? getCenter(XmlElement centerElement) {
   String centerVal = centerElement.innerText.toString();
   bool? center;
-  try{
+  try {
     center = bool.parse(centerVal.toLowerCase().replaceAll(' ', ''));
-  } on Exception catch(_) {
+  } on Exception catch (_) {
     debugPrint("Failed to interpret bool value $centerVal");
-    center=null;
+    center = null;
   }
-  
+
   return center;
 }
 
-double? getHeight(XmlElement heightElement){
+double? getHeight(XmlElement heightElement) {
   final heightVal = heightElement.innerText.toString();
   double? height;
-  try{
+  try {
     height = double.parse(heightVal.toLowerCase().replaceAll(' ', ''));
-  } on Exception catch(_) {
+  } on Exception catch (_) {
     debugPrint("Failed to interpret double value $heightVal");
     height = null;
   }
   return height;
 }
 
-double? getDouble(XmlElement numElement){
+double? getDouble(XmlElement numElement) {
   final val = numElement.innerText.toString();
   double? number;
-  if(val!=""){
-    try{
+  if (val != "") {
+    try {
       number = double.parse(val.toLowerCase().replaceAll(' ', ''));
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       debugPrint("Failed to interpret double value $val");
       number = null;
     }
   }
-  
+
   return number;
 }
 
-double? getWidth(XmlElement widthElement){
+double? getWidth(XmlElement widthElement) {
   final widthVal = widthElement.innerText.toString();
   double? width;
-  try{
+  try {
     width = double.parse(widthVal.toLowerCase().replaceAll(' ', ''));
-  } on Exception catch(_) {
+  } on Exception catch (_) {
     debugPrint("Failed to interpret double value $widthVal");
     width = null;
   }
   return width;
 }
 
-List<double?> getSize(XmlElement sizeElement){
+List<double?> getSize(XmlElement sizeElement) {
   var heightElement = sizeElement.getElement("height");
   var height = heightElement != null ? getHeight(heightElement) : null;
-  
+
   var widthElement = sizeElement.getElement("width");
   var width = widthElement != null ? getWidth(widthElement) : null;
-  
+
   return [height, width];
 }
 
-List<double?> getLocation(XmlElement locationElement){
+List<double?> getLocation(XmlElement locationElement) {
   var topElement = locationElement.getElement("top");
   var top = topElement != null ? getDouble(topElement) : null;
-  
+
   var leftElement = locationElement.getElement("left");
   var left = leftElement != null ? getDouble(leftElement) : null;
-  
+
   return [top, left];
 }
 
-String getString(XmlElement? string){
+String getString(XmlElement? string) {
   var value = string != null ? string.innerText.toString() : "";
   return value;
 }
 
-String getImgPath(XmlElement? path){
+String getImgPath(XmlElement? path) {
   String value = path != null ? path.innerText.toString() : "";
-  if(value != ""){
+  if (value != "") {
     return value;
   } else {
     return "error.png";
   }
 }
 
-TextAlign getTextAlign(XmlElement textAlign){
+TextAlign getTextAlign(XmlElement textAlign) {
   var alignValue = textAlign.innerText.toString();
   TextAlign align;
-  switch(alignValue){
+  switch (alignValue) {
     case "right":
       align = TextAlign.right;
       break;
@@ -205,10 +206,10 @@ TextAlign getTextAlign(XmlElement textAlign){
   return align;
 }
 
-MainAxisAlignment getMainAxisAlignment(XmlElement alignment){
+MainAxisAlignment getMainAxisAlignment(XmlElement alignment) {
   var alignValue = alignment.innerText.toString();
   MainAxisAlignment align;
-  switch(alignValue){
+  switch (alignValue) {
     case "center" || "MainAxisAlignment.center":
       align = MainAxisAlignment.center;
       break;
@@ -233,10 +234,10 @@ MainAxisAlignment getMainAxisAlignment(XmlElement alignment){
   return align;
 }
 
-MainAxisSize getMainAxisSize(XmlElement alignment){
+MainAxisSize getMainAxisSize(XmlElement alignment) {
   var alignValue = alignment.innerText.toString();
   MainAxisSize align;
-  switch(alignValue){
+  switch (alignValue) {
     case "min" || "MainAxisSize.min":
       align = MainAxisSize.min;
       break;
@@ -249,10 +250,10 @@ MainAxisSize getMainAxisSize(XmlElement alignment){
   return align;
 }
 
-CrossAxisAlignment getCrossAxisAlignment(XmlElement alignment){
+CrossAxisAlignment getCrossAxisAlignment(XmlElement alignment) {
   var alignValue = alignment.innerText.toString();
   CrossAxisAlignment align;
-  switch(alignValue){
+  switch (alignValue) {
     case "center" || "CrossAxisAlignment.center":
       align = CrossAxisAlignment.center;
       break;
@@ -274,39 +275,64 @@ CrossAxisAlignment getCrossAxisAlignment(XmlElement alignment){
   return align;
 }
 
-List<ICObject> getActions(XmlElement action, context){
+List<ICObject> getActions(XmlElement action, context) {
   var actionsList = action.childElements;
   List<ICObject> actions = [];
 
-  for(var action in actionsList){
+  for (var action in actionsList) {
     actions.add(getUIElement(action, context));
   }
   return actions;
 }
 
-void onPressed(Map? action){
-    var type = action?['type'];
-    var target = action?['target'];
+void onPressed(Map<String?, String?> action, BuildContext context) {
+  String? type = action['type'];
+  String? target = action['target'];
 
-    if (type == 'link') {
-      launchUrl(Uri.parse(target));
+  final provider = Provider.of<InfinicardStateProvider>(context, listen: false);
+
+  if (type != null && target != null) {
+    switch (type) {
+      case "link":
+        launchUrl(Uri.parse(target));
+        break;
+      case "page":
+        // Navigator.push(context, MaterialPageRoute(builder: (context) => provider.icApp.pages[target]?.toFlutter(context) ?? provider.icApp.pages["home"]!.toFlutter(context)));
+        Navigator.push(
+            context,
+            PageRouteBuilder(
+                transitionDuration: Duration.zero,
+                pageBuilder: (context, __, ___) =>
+                    provider.icApp.pages[target]?.toFlutter(context) ??
+                    provider.icApp.pages["home"]!.toFlutter(context)));
     }
   }
+}
 
-Map getAction(XmlElement onPressedElement){
-  var action = {};
+Map<String?, String?> getAction(XmlElement onPressedElement) {
+  Map<String?, String?> action = {};
   action['type'] = null;
   action['target'] = null;
   var typeElement = onPressedElement.getElement('type');
-  if(typeElement!=null){
+  if (typeElement != null) {
     var type = typeElement.innerText.toString();
-    if(type=="link"){
-      var targetElement = onPressedElement.getElement('target');
-      if(targetElement!=null){
-        var target = targetElement.innerText.toString();
-        action['type'] = 'link';
-        action['target'] = target;
-      }
+    switch (type) {
+      case "link":
+        XmlElement? targetElement = onPressedElement.getElement('target');
+        if (targetElement != null) {
+          var target = targetElement.innerText.toString();
+          action['type'] = 'link';
+          action['target'] = target;
+        }
+        break;
+      case "page":
+        XmlElement? targetElement = onPressedElement.getElement('target');
+        if (targetElement != null) {
+          var target = targetElement.innerText.toString();
+          action['type'] = 'page';
+          action['target'] = target;
+        }
+        break;
     }
   }
   return action;
@@ -314,23 +340,22 @@ Map getAction(XmlElement onPressedElement){
 
 bool contained(BoxAction parent, DrawAction child) {
   Rect childRect = Rect.zero;
-  if(child is LineAction){
+  if (child is LineAction) {
     childRect = child.linePath.getBounds();
-  } else if(child is StrokeAction){
+  } else if (child is StrokeAction) {
     childRect = child.strokePath.getBounds();
-  } else if(child is BoxAction){
+  } else if (child is BoxAction) {
     childRect = child.rect;
   }
-  if(childRect != Rect.zero){
+  if (childRect != Rect.zero) {
     if (parent.rect.contains(childRect.topLeft) &&
-      parent.rect.contains(childRect.topRight) &&
-      parent.rect.contains(childRect.bottomLeft) &&
-      parent.rect.contains(childRect.bottomRight)) {
-    return true;
+        parent.rect.contains(childRect.topRight) &&
+        parent.rect.contains(childRect.bottomLeft) &&
+        parent.rect.contains(childRect.bottomRight)) {
+      return true;
     } else {
       return false;
     }
   }
   return false;
-
 }
